@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 冰箱清单需要看到全部可冻结应用 -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!-- 卸载 / 重装 -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <!-- 自动冻结前台服务与常驻通知 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- 「跳过正在前台使用的应用」需用量访问（由用户在系统设置中授予） -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 固定快捷方式（Android 8.0 以下需此权限） -->
+    <uses-permission
+        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
+        tools:ignore="ProtectedPermissions" />
+
+    <application>
+
+        <!-- 对外动作入口（自有 action + 兼容雹契约），透明无界面 -->
+        <activity
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangApiActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="${applicationId}.action.LAUNCH" />
+                <action android:name="${applicationId}.action.FREEZE" />
+                <action android:name="${applicationId}.action.UNFREEZE" />
+                <action android:name="${applicationId}.action.FREEZE_ALL" />
+                <action android:name="${applicationId}.action.UNFREEZE_ALL" />
+                <action android:name="${applicationId}.action.FREEZE_NON_WHITELISTED" />
+                <action android:name="${applicationId}.action.FREEZE_TAG" />
+                <action android:name="${applicationId}.action.UNFREEZE_TAG" />
+                <action android:name="${applicationId}.action.LOCK" />
+                <action android:name="${applicationId}.action.LOCK_FREEZE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          雹（Hail）原版契约的兼容入口：默认关闭。
+          设备上可能同时装有雹原版，同名 action 会让系统弹出选择器；
+          故此处用别名组件承载该契约，仅当用户在设置中开启「兼容雹契约」后才启用。
+        -->
+        <activity-alias
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangHailCompatActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:targetActivity="org.beidou.stareye.feature.yaoguang.YaoguangApiActivity">
+            <intent-filter>
+                <action android:name="com.aistra.hail.action.LAUNCH" />
+                <action android:name="com.aistra.hail.action.FREEZE" />
+                <action android:name="com.aistra.hail.action.UNFREEZE" />
+                <action android:name="com.aistra.hail.action.FREEZE_ALL" />
+                <action android:name="com.aistra.hail.action.UNFREEZE_ALL" />
+                <action android:name="com.aistra.hail.action.FREEZE_NON_WHITELISTED" />
+                <action android:name="com.aistra.hail.action.FREEZE_TAG" />
+                <action android:name="com.aistra.hail.action.UNFREEZE_TAG" />
+                <action android:name="com.aistra.hail.action.LOCK" />
+                <action android:name="com.aistra.hail.action.LOCK_FREEZE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 广播入口（自有 action），供 adb / 自动化工具免界面调用 -->
+        <receiver
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangApiReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.action.FREEZE" />
+                <action android:name="${applicationId}.action.UNFREEZE" />
+                <action android:name="${applicationId}.action.FREEZE_ALL" />
+                <action android:name="${applicationId}.action.UNFREEZE_ALL" />
+                <action android:name="${applicationId}.action.FREEZE_NON_WHITELISTED" />
+                <action android:name="${applicationId}.action.LOCK" />
+                <action android:name="${applicationId}.action.LOCK_FREEZE" />
+                <action android:name="${applicationId}.action.FREEZE_AUTO" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 自动冻结常驻服务：监听息屏 / 亮屏；同时作为通知监听服务为「跳过有通知的应用」供数 -->
+        <service
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangAutoFreezeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="应用自动冻结：息屏后按设定延迟冻结清单内应用，亮屏时解冻" />
+        </service>
+
+        <!-- 快捷设置磁贴 -->
+        <service
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangTileService"
+            android:exported="true"
+            android:icon="@android:drawable/ic_lock_power_off"
+            android:label="瑶光冻结"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

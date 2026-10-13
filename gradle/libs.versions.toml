@@ -1,0 +1,75 @@
+# 北斗·群星之眼 —— 版本目录
+# 技术栈与本工程环境对齐（AGP 9 内置 Kotlin + Compose）
+
+[versions]
+agp = "9.3.2"
+kotlin = "2.4.10"
+composeBom = "2026.08.00"
+compose = "1.12.0"
+material3 = "1.5.0-alpha27"
+activityCompose = "1.13.0"
+coreKtx = "1.19.0"
+lifecycle = "2.11.0"
+materialIcons = "1.7.8"
+rikka-shizuku = "13.1.5"
+androidx-annotation = "1.10.0"
+gson = "2.13.1"
+parcelablelist = "2.0.1"
+hidden-api = "4.3.3"
+refine = "4.4.0"
+libcxx = "27.0.12077973"
+boringssl = "20250114"
+bouncycastle = "1.80"
+dhizuku = "2.6.0"
+dhizuku-server = "0.1.0"
+tinypinyin = "2.0.3"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
+compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+compose-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIcons" }
+
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
+
+# Shizuku 客户端 API（天枢中枢，api/shared/provider 用原版源码，aidl 用预编译 Maven 版）
+rikka-shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "rikka-shizuku" }
+rikka-shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "rikka-shizuku" }
+rikka-shizuku-aidl = { group = "dev.rikka.shizuku", name = "aidl", version.ref = "rikka-shizuku" }
+rikka-shizuku-server-shared = { group = "dev.rikka.shizuku", name = "server-shared", version.ref = "rikka-shizuku" }
+rikka-shizuku-rish = { group = "dev.rikka.shizuku", name = "rish", version.ref = "rikka-shizuku" }
+
+# Shizuku server 依赖
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+parcelablelist = { group = "dev.rikka.rikkax.parcelablelist", name = "parcelablelist", version.ref = "parcelablelist" }
+hidden-compat = { group = "dev.rikka.hidden", name = "compat", version.ref = "hidden-api" }
+hidden-stub = { group = "dev.rikka.hidden", name = "stub", version.ref = "hidden-api" }
+refine-annotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "refine" }
+refine-runtime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "refine" }
+
+# 原生编译 prefab 依赖
+libcxx = { group = "org.lsposed.libcxx", name = "libcxx", version.ref = "libcxx" }
+boringssl = { group = "io.github.vvb2060.ndk", name = "boringssl", version.ref = "boringssl" }
+
+# ADB 协议客户端（无线激活）所需的证书生成库
+bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
+
+# Dhizuku（开阳中枢）
+dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version.ref = "dhizuku" }
+dhizuku-server-api = { group = "io.github.iamr0s", name = "Dhizuku-SERVER_API", version.ref = "dhizuku-server" }
+
+# 拼音搜索（瑶光中枢；Apache-2.0 —— 雹原版用的 pinyin4j 为 GPL，按许可铁律不可链接）
+tinypinyin = { group = "com.github.promeg", name = "tinypinyin", version.ref = "tinypinyin" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# 隐藏 API 引用改写（将 stub 类引用转为反射调用）
+refine = { id = "dev.rikka.tools.refine", version.ref = "refine" }

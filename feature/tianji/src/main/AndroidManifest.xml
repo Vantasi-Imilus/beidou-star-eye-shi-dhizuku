@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 列出应用（安装前后信息对比） -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- 无天枢时回退到系统安装器（用户确认式安装） -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!-- 转接层需读取文件管理器传来的 file:// 安装包（Android 13+ 由 SAF content:// 取代） -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <application>
+
+        <!--
+          转接层：注册为系统安装器候选。
+          第三方应用 / 文件管理器通过下列标准 intent 发起安装或卸载请求时，
+          系统会把请求路由到本应用，由天玑中枢接管安装流程。
+        -->
+        <activity
+            android:name="org.beidou.stareye.feature.tianji.TianjiInstallActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.BeidouStarEye">
+
+            <!-- 打开 / 安装 APK -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.INSTALL_PACKAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/vnd.android.package-archive" />
+            </intent-filter>
+
+            <!-- 分享 APK 到本应用 -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/vnd.android.package-archive" />
+            </intent-filter>
+
+            <!-- 卸载请求转接 -->
+            <intent-filter>
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </activity>
+
+        <!-- 系统安装器回退通道的会话结果接收器 -->
+        <receiver
+            android:name="org.beidou.stareye.feature.tianji.TianjiInstallReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.beidou.stareye.feature.tianji.INSTALL_RESULT" />
+                <action android:name="org.beidou.stareye.feature.tianji.UNINSTALL_RESULT" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

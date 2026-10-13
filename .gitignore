@@ -1,0 +1,20 @@
+# ── 构建产物 ──
+build/
+.gradle/
+.kotlin/
+.cxx/
+*.iml
+.idea/
+captures/
+
+# ── 本地配置（含本机 SDK 路径，不入库）──
+local.properties
+
+# ── 源码归档（源码已在本仓库内，避免重复存储）──
+dist/*.zip
+dist/*.tar.gz
+dist/backup-*/
+
+# ── 系统文件 ──
+.DS_Store
+Thumbs.db

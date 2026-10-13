@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      转接层：重新暴露原版 Dhizuku 的外部契约。
+      第三方应用（经 io.github.iamr0s:Dhizuku-API）硬编码以下标识，
+      在此原样声明，使其申请直接路由到开阳中枢。
+    -->
+    <permission
+        android:name="com.rosan.dhizuku.permission.API"
+        android:protectionLevel="dangerous" />
+
+    <uses-permission android:name="com.rosan.dhizuku.permission.API" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <application>
+
+        <!-- Device Owner 载体 -->
+        <receiver
+            android:name="org.beidou.stareye.feature.kaiyang.KaiyangDAReceiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/kaiyang_device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          转接层：authority 需同时声明两套——
+          ① 本应用包名版：客户端 API 依据 Device Owner 包名动态计算（我们是 DO，走这套）
+          ② 官方包名版：兼容任何硬编码 com.rosan.dhizuku.* 的调用方
+          权限校验在 Service 内做，Provider 不加 permission（与原版一致）
+        -->
+        <provider
+            android:name="org.beidou.stareye.feature.kaiyang.KaiyangProvider"
+            android:authorities="${applicationId}.dhizuku_server.provider;${applicationId}.server.provider;com.rosan.dhizuku.server.provider;com.rosan.dhizuku.dhizuku_server.provider"
+            android:directBootAware="true"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.server.provider" />
+                <action android:name="com.rosan.dhizuku.server.provider" />
+            </intent-filter>
+        </provider>
+
+        <!-- 授权申请页：同样两套 action -->
+        <activity
+            android:name="org.beidou.stareye.feature.kaiyang.KaiyangPermissionActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.BeidouStarEye">
+            <intent-filter>
+                <action android:name="${applicationId}.action.request.permission" />
+                <action android:name="${applicationId}.action.REQUEST_DHIZUKU_PERMISSION" />
+                <action android:name="com.rosan.dhizuku.action.request.permission" />
+                <action android:name="com.rosan.dhizuku.action.REQUEST_DHIZUKU_PERMISSION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

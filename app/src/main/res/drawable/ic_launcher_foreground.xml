@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 北斗七星 图标前景：七颗星 + 连线 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 斗身连线：天枢-天璇-天玑-天权 -->
+    <path
+        android:pathData="M29,38.4 L29,68 L50.1,75.8 L55.6,46.2 Z"
+        android:strokeColor="#8FD8FF"
+        android:strokeWidth="1.1"
+        android:strokeAlpha="0.55"
+        android:fillColor="#00000000" />
+
+    <!-- 斗柄连线：天权-玉衡-开阳-瑶光 -->
+    <path
+        android:pathData="M55.6,46.2 L69.6,38.4 L82.1,41.5 L91.4,57.9"
+        android:strokeColor="#8FD8FF"
+        android:strokeWidth="1.1"
+        android:strokeAlpha="0.55"
+        android:fillColor="#00000000" />
+
+    <!-- 七颗星 -->
+    <path
+        android:pathData="
+            M25.5,38.4 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M25.5,68.0 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M46.6,75.8 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M52.1,46.2 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M66.1,38.4 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M78.6,41.5 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0
+            M87.9,57.9 a3.5,3.5 0 1,1 7,0 a3.5,3.5 0 1,1 -7,0"
+        android:fillColor="#EAF6FF" />
+</vector>

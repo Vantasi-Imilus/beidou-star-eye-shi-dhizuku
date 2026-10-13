@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 网络：Wi-Fi 状态查询与开关 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- 应用管理 -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <application>
+
+        <!--
+          对外 API 转接层：接收第三方广播调用（契约与 OwnDroid 保持一致）。
+          exported=true 是必要的（外部应用需能发送广播）；
+          安全由「默认关闭 + 密钥常量时间校验 + 密钥长度下限」三重保障。
+        -->
+        <receiver
+            android:name="org.beidou.stareye.feature.yuheng.YuhengApiReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.action.HIDE" />
+                <action android:name="${applicationId}.action.UNHIDE" />
+                <action android:name="${applicationId}.action.SUSPEND" />
+                <action android:name="${applicationId}.action.UNSUSPEND" />
+                <action android:name="${applicationId}.action.DISABLE_METERED_DATA" />
+                <action android:name="${applicationId}.action.ENABLE_METERED_DATA" />
+                <action android:name="${applicationId}.action.DISABLE_USER_CONTROL" />
+                <action android:name="${applicationId}.action.ENABLE_USER_CONTROL" />
+                <action android:name="${applicationId}.action.BLOCK_UNINSTALL" />
+                <action android:name="${applicationId}.action.UNBLOCK_UNINSTALL" />
+                <action android:name="${applicationId}.action.CLEAR_APP_STORAGE" />
+                <action android:name="${applicationId}.action.ADD_USER_RESTRICTION" />
+                <action android:name="${applicationId}.action.CLEAR_USER_RESTRICTION" />
+                <action android:name="${applicationId}.action.SET_PERMISSION_DEFAULT" />
+                <action android:name="${applicationId}.action.SET_PERMISSION_GRANTED" />
+                <action android:name="${applicationId}.action.SET_PERMISSION_DENIED" />
+                <action android:name="${applicationId}.action.SET_SCREEN_CAPTURE_DISABLED" />
+                <action android:name="${applicationId}.action.SET_SCREEN_CAPTURE_ENABLED" />
+                <action android:name="${applicationId}.action.SET_CAMERA_DISABLED" />
+                <action android:name="${applicationId}.action.SET_CAMERA_ENABLED" />
+                <action android:name="${applicationId}.action.SET_USB_DISABLED" />
+                <action android:name="${applicationId}.action.SET_USB_ENABLED" />
+                <action android:name="${applicationId}.action.LOCK" />
+                <action android:name="${applicationId}.action.REBOOT" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

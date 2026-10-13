@@ -1,0 +1,15 @@
+# 跨平台行尾约定：源码统一 LF，Windows 脚本保持 CRLF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh text eol=lf
+gradlew text eol=lf
+
+# 二进制文件不做行尾转换
+*.apk binary
+*.jar binary
+*.so binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ttf binary
