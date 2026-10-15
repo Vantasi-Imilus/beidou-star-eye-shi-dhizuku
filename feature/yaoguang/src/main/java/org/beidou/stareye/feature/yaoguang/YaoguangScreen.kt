@@ -592,8 +592,10 @@ private fun AppActionDialog(
                     }
                 }
                 if (!app.frozen) {
+                    // 注意：不可在此处 onDismiss() —— 宿主对话框被移除会连带销毁本组件的
+                    // scheduleOpen 状态，导致延时选择对话框永远不显示（真机发现的 bug）。
+                    // 改为层叠显示，选择完成后再一并收起菜单。
                     ActionText("延时冻结…") {
-                        onDismiss()
                         scheduleOpen = true
                     }
                 }
@@ -701,6 +703,7 @@ private fun AppActionDialog(
                                     YaoguangOps.scheduleFreeze(context, app.packageName, minutes)
                                     onChanged("已排定：${app.label} · $minutes 分钟后冻结")
                                     scheduleOpen = false
+                                    onDismiss()
                                 }
                                 .padding(horizontal = 8.dp, vertical = 10.dp),
                         )

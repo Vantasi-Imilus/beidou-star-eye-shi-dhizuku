@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tianquan_shortcut_new_session">新建会话</string>
+    <string name="tianquan_shortcut_floating">浮动窗</string>
+</resources>

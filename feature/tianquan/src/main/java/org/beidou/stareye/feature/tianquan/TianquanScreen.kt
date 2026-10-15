@@ -207,6 +207,8 @@ fun TianquanScreen(onBack: () -> Unit) {
             Spacer(Modifier.width(6.dp))
             Chip("文件", accent) { showFileService = true }
             Spacer(Modifier.width(6.dp))
+            Chip("浮动", accent) { TianquanFloatingWindow.request(context) }
+            Spacer(Modifier.width(6.dp))
             Chip("设置", accent) { showSettings = true }
         }
 
@@ -246,8 +248,11 @@ fun TianquanScreen(onBack: () -> Unit) {
                     if (mouseActive) {
                         val screenLine = line - emu!!.buffer.scrollback.size
                         if (screenLine >= 0) {
-                            emu.reportMouse(MouseButton.LEFT, col, screenLine, press = true, motion = false)
-                            emu.reportMouse(MouseButton.LEFT, col, screenLine, press = false, motion = false)
+                            // 附带像素坐标：SGR 像素协议（1016）需要，其余协议忽略
+                            val px = ((col + 1) * charWpx).toInt()
+                            val py = ((screenLine + 1) * rowHpx).toInt()
+                            emu.reportMouse(MouseButton.LEFT, col, screenLine, press = true, motion = false, pixelCol = px, pixelRow = py)
+                            emu.reportMouse(MouseButton.LEFT, col, screenLine, press = false, motion = false, pixelCol = px, pixelRow = py)
                             revision++
                         }
                     } else {

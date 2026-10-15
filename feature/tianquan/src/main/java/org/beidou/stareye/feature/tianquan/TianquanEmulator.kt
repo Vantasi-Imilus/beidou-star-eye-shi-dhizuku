@@ -6,6 +6,9 @@ import java.io.ByteArrayOutputStream
 /** 鼠标上报模式（DECSET 1000/1002/1003） */
 enum class MouseMode { NONE, CLICK, DRAG, ANY }
 
+/** 鼠标上报编码协议（DECSET 1005/1006/1015/1016；开启其一互斥关闭其它，与 xterm 一致） */
+enum class MouseEncoding { X10, UTF8, URXVT, SGR, SGR_PIXEL }
+
 /** 供 UI 使用的鼠标按钮编码 */
 object MouseButton {
     const val LEFT = 0
@@ -23,13 +26,19 @@ object MouseButton {
  *
  * 覆盖：
  *  · C0 控制符、CSI（光标/擦除/插删/滚动/滚动区域/REP/制表位）、SGR（含 24 位真彩与全部常用属性）
- *  · ESC 类：RIS / IND / RI / NEL / DECSC / DECRC / DECALN / 字符集指定（G0/G1 + DEC 线绘）/ SO / SI
+ *  · ESC 类：RIS / IND / RI / NEL / DECSC / DECRC / DECALN / 字符集（G0-G3 指定、
+ *    SO/SI、LS2/LS3、SS2/SS3、LS1R/LS2R/LS3R、DEC 线绘 + 英/德/法/丹挪/瑞典/意/西/荷/芬
+ *    国家字符集 + Latin-1 兜底）
  *  · 备用屏（47/1047/1048/1049）、原点模式、自动换行、应用光标键、反显、光标显隐与样式（DECSCUSR）
- *  · 鼠标上报（X10 与 SGR 1006）、括号粘贴（2004）、焦点事件占位（1004）
+ *  · 鼠标上报：X10 / UTF-8 1005 / urxvt 1015 / SGR 1006 / SGR 像素 1016（互斥切换）
+ *  · 宽度变化重排（reflow：主屏 + 回滚历史；DECCOLM 132 列切换自动联动）
+ *  · 括号粘贴（2004）、焦点事件占位（1004）
  *  · OSC：0/1/2 标题、4 调色板、10/11/12 默认前景/背景/光标、52 剪贴板、104/110/111/112 复位
  *  · 应答：DA1/DA2、DSR（5n / 6n / ?6n）、XTGETTCAP 忽略
+ *  · kitty 图形协议（APC `ESC _ G`）与 iTerm2 内联图像（OSC 1337）：**完整消费**序列，
+ *    保证 base64 载荷绝不落入屏幕文本；图像渲染属渲染层改动，本次有意不做
  *
- * 未覆盖（留待补齐）：kitty/iTerm 内联图像、字符集完整切换表、DECCOLM 之外的重排、六击鼠标协议。
+ * 未覆盖（有意取舍）：内联图像的渲染；窗口操作（CSI t）忽略。
  */
 class TianquanEmulator(
     rows: Int,
@@ -71,8 +80,14 @@ class TianquanEmulator(
 
     var mouseMode: MouseMode = MouseMode.NONE
         private set
-    var mouseSgrEncoding = false
+
+    /** 当前鼠标上报编码协议 */
+    var mouseEncoding = MouseEncoding.X10
         private set
+
+    /** 兼容旧接口：是否 SGR 系编码（1006 / 1016） */
+    val mouseSgrEncoding: Boolean
+        get() = mouseEncoding == MouseEncoding.SGR || mouseEncoding == MouseEncoding.SGR_PIXEL
 
     var bracketedPaste = false
         private set
@@ -104,10 +119,16 @@ class TianquanEmulator(
     // ── 制表位 ──
     private var tabStops = BooleanArray(cols) { it % 8 == 0 }
 
-    // ── 字符集 ──
+    // ── 字符集（DEC NRCS）──
+    // G0..G3 四个可指定字符集；GL 区（0x00-0x7F）经 glSlot 选 G0..G3，
+    // GR 区（0x80-0xFF）经 grSlot 选 G1..G3；ssPending 为 SS2/SS3 单字符移位。
     private var g0Charset = 'B'
     private var g1Charset = 'B'
-    private var glIsG1 = false
+    private var g2Charset = 'B'
+    private var g3Charset = 'B'
+    private var glSlot = 0
+    private var grSlot = 1
+    private var ssPending = 0
 
     // ── 保存的光标（主屏/备用屏各一份） ──
     private class SavedCursor {
@@ -120,7 +141,10 @@ class TianquanEmulator(
         var flags = 0L
         var g0 = 'B'
         var g1 = 'B'
-        var glG1 = false
+        var g2 = 'B'
+        var g3 = 'B'
+        var gl = 0
+        var gr = 1
         var origin = false
         var autoWrapMode = true
     }
@@ -132,7 +156,9 @@ class TianquanEmulator(
     private var lastPrintedChar = ' '
 
     // ── 解析状态 ──
-    private enum class State { GROUND, ESC, ESC_CHARSET, CSI, OSC, OSC_ESC, DCS, DCS_ESC }
+    // APC：kitty 图形协议（ESC _ G ... ESC \），内容只消费不落屏；
+    // ESC_PERCENT：ESC % G/@（UTF-8 指定）的中间态，避免 'G' 泄漏成文本。
+    private enum class State { GROUND, ESC, ESC_CHARSET, ESC_PERCENT, CSI, OSC, OSC_ESC, DCS, DCS_ESC, APC, APC_ESC }
     private var state = State.GROUND
     private val params = StringBuilder()
     private val intermediates = StringBuilder()
@@ -145,7 +171,8 @@ class TianquanEmulator(
 
     fun resize(newRows: Int, newCols: Int) {
         if (newRows == primary.rows && newCols == primary.cols) return
-        primary.resize(newRows, newCols)
+        // 主屏（含回滚历史）按新宽度重排软换行；备用屏保守处理：仅截断不重排
+        primary.reflowResize(newRows, newCols)
         alternate.resize(newRows, newCols)
         if (tabStops.size != newCols) {
             val fresh = BooleanArray(newCols) { it % 8 == 0 }
@@ -188,25 +215,60 @@ class TianquanEmulator(
      * @param button 见 [MouseButton]（含修饰位）
      * @param press 按下为 true，抬起为 false
      * @param motion 是否为移动事件
+     * @param pixelCol / pixelRow SGR 像素模式（1016）下的像素坐标（0 为基）；
+     *        未提供时回退为单元格坐标
      */
-    fun reportMouse(button: Int, col: Int, row: Int, press: Boolean, motion: Boolean) {
+    fun reportMouse(
+        button: Int,
+        col: Int,
+        row: Int,
+        press: Boolean,
+        motion: Boolean,
+        pixelCol: Int = -1,
+        pixelRow: Int = -1,
+    ) {
         if (mouseMode == MouseMode.NONE) return
         if (motion && mouseMode != MouseMode.ANY && mouseMode != MouseMode.DRAG) return
-        if (!press && !motion && mouseMode == MouseMode.CLICK) {
-            // 1000 模式只报按下，抬起除 SGR 协议外不发
-            if (!mouseSgrEncoding) return
-        }
 
         val b = button or (if (motion) 32 else 0)
-        if (mouseSgrEncoding) {
-            val suffix = if (press) 'M' else 'm'
-            val seq = "\u001B[<$b;${col + 1};${row + 1}$suffix"
-            onResponse(seq.toByteArray(Charsets.UTF_8))
+        when (mouseEncoding) {
+            MouseEncoding.SGR, MouseEncoding.SGR_PIXEL -> {
+                // 1006 报按下与抬起；1016 坐标改用像素
+                val cx = if (mouseEncoding == MouseEncoding.SGR_PIXEL && pixelCol >= 0) pixelCol else col + 1
+                val cy = if (mouseEncoding == MouseEncoding.SGR_PIXEL && pixelRow >= 0) pixelRow else row + 1
+                val seq = "\u001B[<$b;$cx;$cy${if (press) 'M' else 'm'}"
+                onResponse(seq.toByteArray(Charsets.UTF_8))
+            }
+            MouseEncoding.URXVT -> {
+                // 1015（urxvt）：只上报按下与移动，抬起不发
+                if (!press) return
+                onResponse("\u001B[$b;${col + 1};${row + 1}M".toByteArray(Charsets.UTF_8))
+            }
+            MouseEncoding.UTF8 -> {
+                // 1005：与 X10 同值，但每个字节按 UTF-8 码点编码
+                if (!press && !motion && mouseMode == MouseMode.CLICK) return
+                val payload = byteArrayOf(0x1B, '['.code.toByte(), 'M'.code.toByte()) +
+                    utf8MouseByte(b + 32) + utf8MouseByte(col + 1 + 32) + utf8MouseByte(row + 1 + 32)
+                onResponse(payload)
+            }
+            MouseEncoding.X10 -> {
+                // 1000 模式只报按下，抬起不发
+                if (!press && !motion && mouseMode == MouseMode.CLICK) return
+                val cb = (b + 32).coerceIn(32, 255)
+                val cx = (col + 1 + 32).coerceIn(32, 255)
+                val cy = (row + 1 + 32).coerceIn(32, 255)
+                onResponse(byteArrayOf(0x1B, '['.code.toByte(), 'M'.code.toByte(), cb.toByte(), cx.toByte(), cy.toByte()))
+            }
+        }
+    }
+
+    /** 把 0..255 的鼠标字节值编码成 UTF-8 码点（1005 协议：值为码点 U+00xx） */
+    private fun utf8MouseByte(v0: Int): ByteArray {
+        val v = v0.coerceIn(32, 255)
+        return if (v < 0x80) {
+            byteArrayOf(v.toByte())
         } else {
-            val cb = (b + 32).coerceIn(32, 255)
-            val cx = (col + 1 + 32).coerceIn(32, 255)
-            val cy = (row + 1 + 32).coerceIn(32, 255)
-            onResponse(byteArrayOf(0x1B, '['.code.toByte(), 'M'.code.toByte(), cb.toByte(), cx.toByte(), cy.toByte()))
+            byteArrayOf((0xC0 or (v shr 6)).toByte(), (0x80 or (v and 0x3F)).toByte())
         }
     }
 
@@ -217,7 +279,7 @@ class TianquanEmulator(
 
     /** 软复位（DECSTR） */
     fun softReset() {
-        applyModes(listOf(1, 1000, 1002, 1003, 1006, 2004), false)
+        applyModes(listOf(1, 1000, 1002, 1003, 1005, 1006, 1015, 1016, 2004), false)
         originMode = false
         autoWrap = true
         insertMode = false
@@ -277,8 +339,8 @@ class TianquanEmulator(
                 ch == '\t' -> nextTabStop()
                 ch == '\n' || ch == '\u000B' || ch == '\u000C' -> lineFeed()
                 ch == '\r' -> cursorCol = 0
-                ch == '\u000E' -> glIsG1 = true      // SO
-                ch == '\u000F' -> glIsG1 = false     // SI
+                ch == '\u000E' -> glSlot = 1         // SO：GL ← G1
+                ch == '\u000F' -> glSlot = 0         // SI：GL ← G0
                 ch < ' ' -> Unit
                 else -> putChar(ch)
             }
@@ -298,6 +360,8 @@ class TianquanEmulator(
                     }
                     ']' -> { oscBuf.clear(); state = State.OSC }
                     'P' -> { oscBuf.clear(); state = State.DCS }
+                    '_' -> state = State.APC                          // APC：kitty 图形协议 → 消费丢弃
+                    '%' -> state = State.ESC_PERCENT                  // ESC % G/@：UTF-8 指定
                     '7' -> { saveCursor(); state = State.GROUND }
                     '8' -> { restoreCursor(); state = State.GROUND }
                     'D' -> { lineFeed(); state = State.GROUND }
@@ -305,6 +369,13 @@ class TianquanEmulator(
                     'E' -> { cursorCol = 0; lineFeed(); state = State.GROUND }
                     'H' -> { setTabStop(); state = State.GROUND }      // HTS
                     'c' -> { hardReset(); state = State.GROUND }
+                    'N' -> { ssPending = 2; state = State.GROUND }     // SS2：下一字符取自 G2
+                    'O' -> { ssPending = 3; state = State.GROUND }     // SS3：下一字符取自 G3
+                    'n' -> { glSlot = 2; state = State.GROUND }        // LS2：GL ← G2
+                    'o' -> { glSlot = 3; state = State.GROUND }        // LS3：GL ← G3
+                    '}' -> { grSlot = 2; state = State.GROUND }        // LS2R：GR ← G2
+                    '|' -> { grSlot = 3; state = State.GROUND }        // LS3R：GR ← G3
+                    '~' -> { grSlot = 1; state = State.GROUND }        // LS1R：GR ← G1
                     else -> state = State.GROUND                        // DECKPAM/DECKPNM/其他：忽略
                 }
             }
@@ -323,7 +394,8 @@ class TianquanEmulator(
             State.OSC -> when (ch) {
                 '\u0007' -> { applyOsc(oscBuf.toString()); state = State.GROUND }
                 '\u001B' -> state = State.OSC_ESC
-                else -> oscBuf.append(ch)
+                // 超长 OSC（如 iTerm2 大图 base64）截断丢弃，防止内存被撑爆
+                else -> if (oscBuf.length < MAX_OSC_LENGTH) oscBuf.append(ch)
             }
 
             State.OSC_ESC -> {
@@ -333,17 +405,31 @@ class TianquanEmulator(
 
             State.ESC_CHARSET -> {
                 when (charsetSlot) {
-                    '(' -> g0Charset = ch
-                    ')' -> g1Charset = ch
-                    '*' -> g0Charset = ch
-                    '+' -> g1Charset = ch
+                    '(' -> g0Charset = ch      // G0 指定（GL 默认来源）
+                    ')' -> g1Charset = ch      // G1 指定
+                    '*' -> g2Charset = ch      // G2 指定
+                    '+' -> g3Charset = ch      // G3 指定
                 }
                 charsetSlot = ' '
                 state = State.GROUND
             }
 
+            State.ESC_PERCENT -> state = State.GROUND    // ESC % G / ESC % @：UTF-8 指定，消费即可
+
             State.DCS -> if (ch == '\u001B') state = State.DCS_ESC
             State.DCS_ESC -> state = State.GROUND   // DCS 忽略（含 kitty 图像）
+
+            // APC（kitty 图形协议 `ESC _ G ... ST`）：完整消费载荷、绝不让 base64 落屏
+            State.APC -> when {
+                ch == '\u001B' -> state = State.APC_ESC
+                ch == '\u0007' -> state = State.GROUND   // BEL 也可终止
+                else -> Unit
+            }
+            State.APC_ESC -> state = when {
+                ch == '\\' || ch == '\u0007' -> State.GROUND   // ST / BEL 终止
+                ch == '\u001B' -> State.APC_ESC
+                else -> State.APC
+            }
         }
     }
 
@@ -361,6 +447,10 @@ class TianquanEmulator(
                 title = rest
                 onTitle(rest)
             }
+            // iTerm2 内联图像（OSC 1337;File=...:base64）：
+            // 载荷已由 OSC 状态机完整消费（BEL/ST 终止），此处仅显式确认丢弃。
+            // 图像**渲染**属渲染层改动，本次不做——协议正确消费即保证屏幕不被污染。
+            "1337" -> Unit
             "4" -> applyOscPalette(rest)
             "10" -> applyColorOsc(10, rest)
             "11" -> applyColorOsc(11, rest)
@@ -465,14 +555,21 @@ class TianquanEmulator(
     private fun putChar(ch0: Char) {
         val ch = mapCharset(ch0)
         lastPrintedChar = ch
-        val width = charWidth(ch.code)
+        val width = terminalCharWidth(ch.code)
         if (width == 0) return
 
         if (width == 2 && cursorCol == active.cols - 1) {
-            if (autoWrap) { cursorCol = 0; lineFeed() } else return
+            if (autoWrap) {
+                // 宽字符整体换到下一行：当前行因换行被挤断 → 标记软换行（供 reflow 合并）
+                active.screen[cursorRow].wrapped = true
+                cursorCol = 0
+                lineFeed()
+            } else return
         }
 
         val row = active.screen[cursorRow]
+        // 重新写入该行 → 不再是上一行的软换行续行
+        row.wrapped = false
         if (insertMode) shiftRowRight(cursorCol, width)
         if (cursorCol in 0 until active.cols) {
             row.text[cursorCol] = ch
@@ -495,11 +592,41 @@ class TianquanEmulator(
         }
     }
 
-    /** DEC 线绘字符集映射（G0/G1 = '0'） */
+    /**
+     * 按当前字符集状态映射一个字符（DEC NRCS 完整切换）。
+     *
+     *  · GL 区（0x00-0x7F）按 glSlot 取 G0..G3（SO/SI 在 G0/G1 间切换，LS2/LS3 可指向 G2/G3）；
+     *  · GR 区（0x80-0xFF）按 grSlot 取 G1..G3（LS1R/LS2R/LS3R 切换）；
+     *  · SS2/SS3（ESC N / ESC O）只对下一个 GL 字符生效，且不消耗在 GR 字符上；
+     *  · 未定义映射的字符原样返回 —— 天然兼作 Latin-1 / UTF-8 的兜底。
+     */
     private fun mapCharset(ch: Char): Char {
-        val cs = if (glIsG1) g1Charset else g0Charset
-        if (cs != '0') return ch
-        return DEC_GRAPHICS[ch.code] ?: ch
+        val code = ch.code
+        if (ssPending != 0) {
+            if (code < 0x80) {
+                val cs = charsetOf(ssPending)
+                ssPending = 0
+                return mapViaCharset(cs, ch, code)
+            }
+            // GR 区字符不受 SS 影响（也不消耗 SS 状态）
+        }
+        val slot = if (code >= 0x80) grSlot else glSlot
+        return mapViaCharset(charsetOf(slot), ch, code)
+    }
+
+    private fun charsetOf(slot: Int): Char = when (slot) {
+        1 -> g1Charset
+        2 -> g2Charset
+        3 -> g3Charset
+        else -> g0Charset
+    }
+
+    /** 查表映射：国家字符集表优先，其次 DEC 特殊图形（'0'） */
+    private fun mapViaCharset(cs: Char, ch: Char, code: Int): Char {
+        val pos = if (code >= 0x80) code - 0x80 else code
+        NATIONAL_TABLES[cs]?.let { return it[pos] ?: ch }
+        if (cs == '0') return DEC_GRAPHICS[pos] ?: ch
+        return ch
     }
 
     private fun shiftRowRight(from: Int, count: Int) {
@@ -510,26 +637,6 @@ class TianquanEmulator(
             row.styles[x] = row.styles[x - n]
         }
         row.clear(from, from + n)
-    }
-
-    private fun charWidth(code: Int): Int = when {
-        code == 0 -> 0
-        code < 0x20 -> 0
-        code == 0x200B -> 0
-        code in 0x0300..0x036F -> 0            // 组合符号
-        code in 0x1100..0x115F -> 2
-        code in 0x2E80..0x303E -> 2
-        code in 0x3041..0x33FF -> 2
-        code in 0x3400..0x4DBF -> 2
-        code in 0x4E00..0x9FFF -> 2
-        code in 0xA000..0xA4CF -> 2
-        code in 0xAC00..0xD7A3 -> 2
-        code in 0xF900..0xFAFF -> 2
-        code in 0xFE30..0xFE6F -> 2
-        code in 0xFF00..0xFF60 -> 2
-        code in 0xFFE0..0xFFE6 -> 2
-        code >= 0x20000 -> 2
-        else -> 1
     }
 
     // ───────────────────────── 制表位 ─────────────────────────
@@ -587,7 +694,10 @@ class TianquanEmulator(
         s.flags = attrFlags
         s.g0 = g0Charset
         s.g1 = g1Charset
-        s.glG1 = glIsG1
+        s.g2 = g2Charset
+        s.g3 = g3Charset
+        s.gl = glSlot
+        s.gr = grSlot
         s.origin = originMode
         s.autoWrapMode = autoWrap
     }
@@ -603,7 +713,10 @@ class TianquanEmulator(
         attrFlags = s.flags
         g0Charset = s.g0
         g1Charset = s.g1
-        glIsG1 = s.glG1
+        g2Charset = s.g2
+        g3Charset = s.g3
+        glSlot = s.gl
+        grSlot = s.gr
         originMode = s.origin
         autoWrap = s.autoWrapMode
         rebuildStyle()
@@ -621,14 +734,15 @@ class TianquanEmulator(
         cursorVisible = true
         cursorStyleCode = 0
         mouseMode = MouseMode.NONE
-        mouseSgrEncoding = false
+        mouseEncoding = MouseEncoding.X10
         bracketedPaste = false
         autoWrap = true
         originMode = false
         insertMode = false
         appCursorKeys = false
         reverseVideo = false
-        g0Charset = 'B'; g1Charset = 'B'; glIsG1 = false
+        g0Charset = 'B'; g1Charset = 'B'; g2Charset = 'B'; g3Charset = 'B'
+        glSlot = 0; grSlot = 1; ssPending = 0
         tabStops.fill(false)
         var c = 0
         while (c < tabStops.size) { tabStops[c] = true; c += 8 }
@@ -718,7 +832,9 @@ class TianquanEmulator(
             when (mode) {
                 1 -> appCursorKeys = enable
                 3 -> {
-                    // DECCOLM：切换 80/132 列（同时清屏）
+                    // DECCOLM：切换 80/132 列（同时清屏）。
+                    // 尺寸请求经 onResizeRequest → 会话 resize → 模拟器 resize，
+                    // 主屏将按新宽度自动 reflow（列数变化触发重排）。
                     val target = if (enable) 132 else 80
                     if (target != active.cols) onResizeRequest(active.rows, target)
                     cursorRow = 0; cursorCol = 0
@@ -741,11 +857,21 @@ class TianquanEmulator(
                 1002 -> mouseMode = if (enable) MouseMode.DRAG else MouseMode.NONE
                 1003 -> mouseMode = if (enable) MouseMode.ANY else MouseMode.NONE
                 1004 -> Unit
-                1006 -> mouseSgrEncoding = enable
+                // 编码协议互斥：开启一个自动关闭其它（与 xterm 一致）
+                1005 -> setMouseEncoding(enable, MouseEncoding.UTF8)
+                1006 -> setMouseEncoding(enable, MouseEncoding.SGR)
+                1015 -> setMouseEncoding(enable, MouseEncoding.URXVT)
+                1016 -> setMouseEncoding(enable, MouseEncoding.SGR_PIXEL)
                 2004 -> bracketedPaste = enable
                 else -> Unit
             }
         }
+    }
+
+    /** 切换鼠标编码协议：开启时互斥覆盖；关闭时若正处该协议则退回 X10 */
+    private fun setMouseEncoding(enable: Boolean, encoding: MouseEncoding) {
+        if (enable) mouseEncoding = encoding
+        else if (mouseEncoding == encoding) mouseEncoding = MouseEncoding.X10
     }
 
     /**
@@ -949,7 +1075,10 @@ class TianquanEmulator(
     fun reverseVideoEnabled(): Boolean = reverseVideo
 
     companion object {
-        /** DEC 特殊图形字符集（G0/G1 = '0'）的映射表 */
+        /** OSC 载荷最大缓冲长度（字符）；超长直接丢弃，防止超大 base64 载荷撑爆内存 */
+        private const val MAX_OSC_LENGTH = 1_000_000
+
+        /** DEC 特殊图形字符集（G0-G3 = '0'）的映射表 */
         private val DEC_GRAPHICS = mapOf(
             0x60 to '◆', 0x61 to '▒', 0x62 to '␉', 0x63 to '␌', 0x64 to '␍',
             0x65 to '␊', 0x66 to '°', 0x67 to '±', 0x68 to '␤', 0x69 to '␋',
@@ -959,5 +1088,85 @@ class TianquanEmulator(
             0x79 to '≤', 0x7A to '≥', 0x7B to 'π', 0x7C to '≠', 0x7D to '£',
             0x7E to '·',
         )
+
+        /** 简写：构造一个国家字符集映射表（DEC NRCS 的可替换字符位） */
+        private fun charsetTable(vararg pairs: Pair<Int, Char>): Map<Int, Char> = mapOf(*pairs)
+
+        /**
+         * DEC 国家字符集（NRCS）映射表：设计符 → (字符码 → 替换字符)。
+         * 覆盖 DEC VT220 全部标准国家字符集；未列出的设计符（如 'B' 美式 ASCII）
+         * 走 [mapViaCharset] 的原样兜底（即 Latin-1 直通）。
+         */
+        private val NATIONAL_TABLES: Map<Char, Map<Int, Char>> = buildMap {
+            put('A', charsetTable(0x23 to '£'))   // UK 英国：仅 # → £
+
+            // 荷兰
+            put('4', charsetTable(
+                0x23 to '£', 0x40 to '¾', 0x5B to 'ĳ', 0x5C to '½', 0x5D to '|',
+                0x7B to '¨', 0x7C to 'ƒ', 0x7D to '¼', 0x7E to '´',
+            ))
+
+            // 芬兰（'5' 与 'C' 同表）
+            val finnish = charsetTable(
+                0x5B to 'Ä', 0x5C to 'Ö', 0x5D to 'Å', 0x5E to 'Ü', 0x60 to 'é',
+                0x7B to 'ä', 0x7C to 'ö', 0x7D to 'å', 0x7E to 'ü',
+            )
+            put('5', finnish)
+            put('C', finnish)
+
+            // 法国（'R' 与 'f' 同表）
+            val french = charsetTable(
+                0x23 to '£', 0x40 to 'à', 0x5B to '°', 0x5C to 'ç', 0x5D to '§',
+                0x7B to 'é', 0x7C to 'ù', 0x7D to 'è', 0x7E to '¨',
+            )
+            put('R', french)
+            put('f', french)
+
+            // 法裔加拿大
+            put('Q', charsetTable(
+                0x40 to 'à', 0x5B to 'â', 0x5C to 'ç', 0x5D to 'ê', 0x5E to 'î',
+                0x60 to 'ô', 0x7B to 'é', 0x7C to 'ù', 0x7D to 'è', 0x7E to 'û',
+            ))
+
+            // 德国
+            put('K', charsetTable(
+                0x40 to '§', 0x5B to 'Ä', 0x5C to 'Ö', 0x5D to 'Ü',
+                0x7B to 'ä', 0x7C to 'ö', 0x7D to 'ü', 0x7E to 'ß',
+            ))
+
+            // 意大利
+            put('Y', charsetTable(
+                0x23 to '£', 0x40 to '§', 0x5B to '°', 0x5C to 'ç', 0x5D to 'é',
+                0x60 to 'ù', 0x7B to 'à', 0x7C to 'ò', 0x7D to 'è', 0x7E to 'ì',
+            ))
+
+            // 挪威 / 丹麦（'E' 与 '6' 同表）
+            val norwegian = charsetTable(
+                0x40 to 'Ä', 0x5B to 'Æ', 0x5C to 'Ø', 0x5D to 'Å', 0x5E to 'Ü',
+                0x60 to 'é', 0x7B to 'ä', 0x7C to 'ø', 0x7D to 'å', 0x7E to 'ü',
+            )
+            put('E', norwegian)
+            put('6', norwegian)
+
+            // 西班牙
+            put('Z', charsetTable(
+                0x23 to '£', 0x40 to '§', 0x5B to '¡', 0x5C to 'Ñ', 0x5D to '¿',
+                0x7B to '°', 0x7C to 'ñ', 0x7D to 'ç',
+            ))
+
+            // 瑞典（'H' 与 '7' 同表）
+            val swedish = charsetTable(
+                0x40 to 'É', 0x5B to 'Ä', 0x5C to 'Ö', 0x5D to 'Å', 0x5E to 'Ü',
+                0x60 to 'é', 0x7B to 'ä', 0x7C to 'ö', 0x7D to 'å', 0x7E to 'ü',
+            )
+            put('H', swedish)
+            put('7', swedish)
+
+            // 瑞士
+            put('=', charsetTable(
+                0x23 to 'ù', 0x40 to 'à', 0x5B to 'é', 0x5C to 'ç', 0x5D to 'ê',
+                0x5E to 'î', 0x60 to 'ô', 0x7B to 'ä', 0x7C to 'ö', 0x7D to 'ü', 0x7E to 'û',
+            ))
+        }
     }
 }

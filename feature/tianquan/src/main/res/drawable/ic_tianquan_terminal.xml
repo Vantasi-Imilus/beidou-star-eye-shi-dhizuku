@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 天权 · 终端图标（快捷方式「新建会话」，金色 = 天权星位色） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFC98A"
+        android:pathData="M4,3h16c0.55,0 1,0.45 1,1v16c0,0.55 -0.45,1 -1,1H4c-0.55,0 -1,-0.45 -1,-1V4c0,-0.55 0.45,-1 1,-1z" />
+    <path
+        android:fillColor="#05070F"
+        android:pathData="M6,7h12v10H6z" />
+    <path
+        android:fillColor="#FFC98A"
+        android:pathData="M7.6,10.6l3.4,3l-3.4,3l-1.1,-1.2l2.2,-1.8l-2.2,-1.8z" />
+    <path
+        android:fillColor="#FFC98A"
+        android:pathData="M12.6,15h4v1.6h-4z" />
+</vector>

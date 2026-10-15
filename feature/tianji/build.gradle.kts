@@ -31,6 +31,8 @@ dependencies {
     // 天枢中枢（Shizuku 客户端）：以 shell / root 身份执行 pm install
     implementation(project(":shizuku:api"))
     implementation(project(":core:shell"))
+    // 共享冻结层：安装前后与被冻结应用的联动（统一判定 + 解冻执行）
+    implementation(project(":core:freeze"))
     // 开阳中枢（Dhizuku API，MIT）：以设备所有者身份执行特权操作
     implementation(libs.dhizuku.api)
 

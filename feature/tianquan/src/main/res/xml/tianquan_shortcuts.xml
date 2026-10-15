@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 天权中枢 —— 静态快捷方式（长按桌面图标）：新建会话 / 浮动窗 -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_tianquan_terminal"
+        android:shortcutId="tianquan_new_session"
+        android:shortcutLongLabel="@string/tianquan_shortcut_new_session"
+        android:shortcutShortLabel="@string/tianquan_shortcut_new_session">
+        <intent
+            android:action="org.beidou.star.eye.furry.vantasiimilus.god.api.action.NEW_SESSION"
+            android:targetClass="org.beidou.stareye.feature.tianquan.TianquanExternalRelayActivity"
+            android:targetPackage="org.beidou.star.eye.furry.vantasiimilus.god.api" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_tianquan_float"
+        android:shortcutId="tianquan_floating"
+        android:shortcutLongLabel="@string/tianquan_shortcut_floating"
+        android:shortcutShortLabel="@string/tianquan_shortcut_floating">
+        <intent
+            android:action="org.beidou.star.eye.furry.vantasiimilus.god.api.action.FLOATING_WINDOW"
+            android:targetClass="org.beidou.stareye.feature.tianquan.TianquanExternalRelayActivity"
+            android:targetPackage="org.beidou.star.eye.furry.vantasiimilus.god.api" />
+    </shortcut>
+
+</shortcuts>

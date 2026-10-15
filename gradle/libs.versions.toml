@@ -10,6 +10,7 @@ material3 = "1.5.0-alpha27"
 activityCompose = "1.13.0"
 coreKtx = "1.19.0"
 lifecycle = "2.11.0"
+savedstate = "1.4.0"
 materialIcons = "1.7.8"
 rikka-shizuku = "13.1.5"
 androidx-annotation = "1.10.0"
@@ -27,6 +28,7 @@ tinypinyin = "2.0.3"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-savedstate = { group = "androidx.savedstate", name = "savedstate-ktx", version.ref = "savedstate" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }

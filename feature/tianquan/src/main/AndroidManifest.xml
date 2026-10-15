@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- 浮动终端：系统级悬浮窗 + specialUse 前台服务（Android 14+ 需要显式类型） -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <application>
 
         <!-- 文件服务前台保活（退到后台后仍可传输） -->
@@ -15,6 +19,50 @@
             android:name="org.beidou.stareye.feature.tianquan.TianquanFileService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- 浮动终端前台服务：TYPE_APPLICATION_OVERLAY 悬浮窗，退出应用后继续存在 -->
+        <service
+            android:name="org.beidou.stareye.feature.tianquan.TianquanFloatingService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="天权中枢系统级悬浮终端（可拖动/缩放，独立会话）" />
+        </service>
+
+        <!-- 对外集成透明入口（Tasker / 静态快捷方式）；action 前缀 = applicationId -->
+        <activity
+            android:name="org.beidou.stareye.feature.tianquan.TianquanExternalRelayActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="org.beidou.star.eye.furry.vantasiimilus.god.api.action.NEW_SESSION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.beidou.star.eye.furry.vantasiimilus.god.api.action.RUN_COMMAND" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.beidou.star.eye.furry.vantasiimilus.god.api.action.FLOATING_WINDOW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            静态快捷方式元数据：声明与 app 模块同名 Activity，经 manifest 合并
+            把 meta-data 挂到宿主入口 MainActivity（启动器只从 LAUNCHER Activity 读取快捷方式）。
+        -->
+        <activity
+            android:name="org.beidou.stareye.MainActivity"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/tianquan_shortcuts" />
+        </activity>
 
     </application>
 </manifest>

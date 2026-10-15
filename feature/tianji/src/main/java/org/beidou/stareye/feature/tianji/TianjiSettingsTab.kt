@@ -164,6 +164,14 @@ fun TianjiSettingsTab(accent: Color) {
             ) {
                 update(options.copy(requireBiometrics = it))
             }
+            ToggleRow(
+                "安装后自动解冻",
+                "目标应用若处于冻结（挂起 / 隐藏 / 禁用），安装完成后自动解冻（与瑶光 / 天璇联动）",
+                options.unfreezeAfterInstall,
+                accent,
+            ) {
+                update(options.copy(unfreezeAfterInstall = it))
+            }
         }
 
         // ── 禁止安装名单 ──

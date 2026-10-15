@@ -2,6 +2,7 @@ package org.beidou.stareye.feature.yaoguang
 
 import android.app.admin.DevicePolicyManager
 import android.content.Context
+import org.beidou.stareye.core.freeze.FreezeState
 import org.beidou.stareye.core.shell.ShizukuShell
 import org.beidou.stareye.feature.kaiyang.KaiyangState
 
@@ -93,6 +94,50 @@ object YaoguangCore {
         }
     }
 
+    /**
+     * 解冻：按应用**当前的实际形态**逐一清除（挂起 / 隐藏 / 禁用）。
+     *
+     * 冻结方式（[FreezeKind]）可随时切换，同一应用可能带多种形态（先挂起后又禁用等）；
+     * 若只清「当前设置的那一种」，其余形态会残留 —— 真机表现为
+     * 「解冻后图标仍隐藏、应用却能启动」（hidden 残留 + enabled 已恢复）。
+     * 每个形态独立解析通道：所选通道不支持该形态（如开阳不支持禁用）时回退自动择优。
+     */
+    fun unfreezeAll(context: Context, packageName: String, channel: FreezeChannel): Result<Unit> {
+        val flags = FreezeState.flags(context, packageName)
+        if (!flags.frozen) return Result.success(Unit)
+        val failures = mutableListOf<String>()
+
+        fun clear(kind: FreezeKind) {
+            // 候选通道按序尝试：用户所选通道优先，其后依次回退。
+            // 关键原因：华为等 ROM 的 shell（uid 2000）缺 MANAGE_USERS 权限，
+            // `pm unhide` 会被 SecurityException 拒绝 —— 隐藏类形态必须能回退到开阳（DPM）。
+            val candidates = buildList {
+                if (channel != FreezeChannel.AUTO) add(channel)
+                add(FreezeChannel.OWNER)
+                add(FreezeChannel.SHIZUKU)
+                add(FreezeChannel.ROOT)
+            }.distinct().filter { supports(it, kind) && ready(context, it) }
+
+            var lastError: Throwable? = null
+            for (candidate in candidates) {
+                val result = setFrozen(context, packageName, false, candidate, kind)
+                if (result.isSuccess) return
+                lastError = result.exceptionOrNull()
+            }
+            failures += "${kind.label}：${lastError?.message ?: "无可用通道"}"
+        }
+
+        if (flags.suspended) clear(FreezeKind.SUSPEND)
+        if (flags.hidden) clear(FreezeKind.HIDE)
+        if (flags.disabled) clear(FreezeKind.DISABLE)
+
+        return if (failures.isEmpty()) {
+            Result.success(Unit)
+        } else {
+            Result.failure(IllegalStateException(failures.joinToString("；")))
+        }
+    }
+
     private fun ownerSet(context: Context, pkg: String, frozen: Boolean, kind: FreezeKind): Result<Unit> =
         runCatching {
             val manager = dpm(context)
@@ -113,7 +158,14 @@ object YaoguangCore {
     private fun shellSet(backend: FreezeChannel, pkg: String, frozen: Boolean, kind: FreezeKind): Result<Unit> {
         // 强停没有「解冻」动作 —— 用户下次启动应用即自动恢复
         if (kind == FreezeKind.STOP && !frozen) return Result.success(Unit)
-        return runShell(backend, shellCommand(pkg, frozen, kind)).map { }
+        return runShell(backend, shellCommand(pkg, frozen, kind)).map { }.recoverCatching { e ->
+            // 部分 ROM（实测华为）的 shell 缺 MANAGE_USERS，hide / unhide 会被系统拒绝；
+            // 转成可操作提示，而不是把裸 SecurityException 抛给用户
+            if (kind == FreezeKind.HIDE) {
+                error("${e.message ?: "命令执行失败"} —— 隐藏类操作在此设备上需改用「开阳（设备所有者）」通道")
+            }
+            throw e
+        }
     }
 
     private fun shellCommand(pkg: String, frozen: Boolean, kind: FreezeKind): String {

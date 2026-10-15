@@ -19,8 +19,6 @@ import com.github.promeg.pinyinhelper.Pinyin
 import org.beidou.stareye.core.freeze.FreezeEvents
 import org.beidou.stareye.core.freeze.FreezeState
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /** 应用条目（应用页与首页共用） */
 data class YaoguangApp(
@@ -62,9 +60,6 @@ data class BatchResult(val done: Int, val failed: Int, val lastError: String? = 
  */
 object YaoguangOps {
 
-    /** 延时冻结的进程内调度器（应用进程退出则计划失效） */
-    private val scheduler = Executors.newSingleThreadScheduledExecutor()
-
     // ── 单应用冻结 / 解冻 ──
 
     fun setFrozen(context: Context, packageName: String, frozen: Boolean): Result<Unit> {
@@ -73,7 +68,13 @@ object YaoguangOps {
         }
         val kind = YaoguangStore.kind(context)
         val channel = YaoguangStore.channel(context)
-        val result = YaoguangCore.setFrozen(context, packageName, frozen, channel, kind)
+        val result = if (frozen) {
+            YaoguangCore.setFrozen(context, packageName, true, channel, kind)
+        } else {
+            // 解冻按实际形态逐一清除：冻结方式切换后可能残留其他形态
+            // （如先隐藏后又禁用），只清当前形态会留下"图标隐藏但可用"的残留
+            YaoguangCore.unfreezeAll(context, packageName, channel)
+        }
         YaoguangStore.appendLog(
             context,
             action = if (frozen) "冻结·${kind.label}" else "解冻",
@@ -145,14 +146,10 @@ object YaoguangOps {
 
     // ── 延时冻结 ──
 
+    /** 排定延时冻结：持久化 + AlarmManager，进程被杀或设备重启后仍然生效 */
     fun scheduleFreeze(context: Context, packageName: String, minutes: Int) {
-        val appContext = context.applicationContext
         val label = appLabel(context, packageName)
-        scheduler.schedule(
-            { runCatching { setFrozen(appContext, packageName, true) } },
-            minutes.toLong(),
-            TimeUnit.MINUTES,
-        )
+        YaoguangDelayedFreeze.schedule(context, packageName, minutes)
         YaoguangStore.appendLog(context, "延时冻结", "$label · $minutes 分钟后", "已排定")
     }
 

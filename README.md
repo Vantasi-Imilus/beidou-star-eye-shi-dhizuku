@@ -26,12 +26,12 @@
 | 星位 | 中枢 | 能力 | 上游项目 |
 |:---:|---|---|---|
 | **天枢** | 授权中枢 | Shizuku 服务端全量嵌入，ADB / Root / **应用内一键无线激活** 三通道 | [Shizuku](https://github.com/RikkaApps/Shizuku) · Apache-2.0（源码内嵌）|
-| **天璇** | 应用管理中枢 | 应用列表/详情、冻结解冻、强停、清数据、卸载、导出 APK、操作记录 | [App Manager](https://github.com/MuntashirAkon/AppManager) · GPL-3.0（零拷贝自研）|
-| **天玑** | 安装器中枢 | APK/APKS/XAPK 解析、三授权器静默安装、分包选择、签名校验、**默认安装器/卸载器一键注册** | [InstallerX-Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) · GPL-3.0（零拷贝自研）|
-| **天权** | 终端中枢 | 自研终端模拟器 + **原生 pty** 会话、多会话、选择复制、局域网 HTTP/FTP 文件服务 | [Termux-X](https://github.com/hanxinhao000/ZeroTermux)（ZeroTermux 系）· GPL-3.0（零拷贝自研）|
+| **天璇** | 应用管理中枢 | 应用列表/详情、冻结解冻、强停、清数据、卸载、导出 APK（含 split 全量）、**组件管理**、**残留扫描**、**签名信息**、**APK 文件级编辑 + v1/v2/v3 重签名**、操作记录 | [App Manager](https://github.com/MuntashirAkon/AppManager) · GPL-3.0（零拷贝自研）|
+| **天玑** | 安装器中枢 | APK/APKS/XAPK 解析、三授权器静默安装、分包选择、签名校验、**默认安装器/卸载器一键注册**、**批量安装队列**、**SAF 目录导入**、**安装后自动解冻被冻结应用** | [InstallerX-Revived](https://github.com/wxxsfxyzm/InstallerX-Revived) · GPL-3.0（零拷贝自研）|
+| **天权** | 终端中枢 | 自研终端模拟器（**宽度重排 reflow**、多国字符集、扩展鼠标协议）+ **原生 pty** 会话、多会话、选择复制、局域网 HTTP/FTP 文件服务、**系统级浮动终端窗**、对外 action 与快捷方式 | [Termux-X](https://github.com/hanxinhao000/ZeroTermux)（ZeroTermux 系）· GPL-3.0（零拷贝自研）|
 | **玉衡** | 设备管控中枢 | Device Owner 深度管控：系统策略 / 应用 / 用户 / **69 项用户限制** / 密码与锁屏 / 网络 + 24 个对外 API | [OwnDroid](https://github.com/BinTianqi/OwnDroid) · GPL-3.0（零拷贝自研）|
 | **开阳** | Device Owner 中枢 | Device Owner 激活与管理 + **转接层**（第三方 Dhizuku 客户端的请求路由到本应用）| [Dhizuku](https://github.com/iamr0s/Dhizuku) · GPL-3.0（链接其 MIT 库）|
-| **瑶光** | 冻结中枢 | **四语义冻结**（挂起/隐藏/禁用/强停）× 三通道、我的清单/标签/白名单、自动冻结、磁贴与快捷方式、对外 API | [Hail](https://github.com/aistra0528/Hail) · GPL-3.0（零拷贝自研）|
+| **瑶光** | 冻结中枢 | **四语义冻结**（挂起/隐藏/禁用/强停）× 三通道、我的清单/标签/白名单、自动冻结（**开机自启 + 延迟兜底闹钟**）、**延时冻结（跨进程持久化）**、磁贴与快捷方式、对外 API | [Hail](https://github.com/aistra0528/Hail) · GPL-3.0（零拷贝自研）|
 
 ## 特性
 
@@ -61,7 +61,7 @@ export JAVA_HOME=<JDK 21 路径>
 ./gradlew :app:assembleRelease   # 发行版（复用 debug 签名，可覆盖安装）
 ```
 
-产物输出到 `dist/`。仓库内已附构建好的 APK（`dist/`），debug 与 release 同签名，可直接覆盖安装。
+产物输出到 `dist/`（已整体 gitignore）。**APK 经 GitHub Releases 发布**，debug 与 release 同签名，可直接覆盖安装。
 
 ## 技术栈
 

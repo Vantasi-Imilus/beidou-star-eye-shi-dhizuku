@@ -42,4 +42,8 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
+
+    // APK 编辑重签名（v1+v2+v3）。apksig 为 Apache-2.0（AGP 自带工具库），许可允许链接；
+    // 本模块唯一新增依赖。若 Android 运行时不可用，代码已带未签名产物兜底。
+    implementation("com.android.tools.build:apksig:8.7.3")
 }

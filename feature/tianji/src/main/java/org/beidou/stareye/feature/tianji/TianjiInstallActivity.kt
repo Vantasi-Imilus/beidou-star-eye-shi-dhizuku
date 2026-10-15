@@ -99,6 +99,9 @@ private sealed interface RelayTarget {
     /** 卸载请求：目标包名 */
     data class Uninstall(val packageName: String) : RelayTarget
 
+    /** 批量安装请求：多个待安装文件的 Uri */
+    data class Batch(val uris: List<Uri>) : RelayTarget
+
     data object Invalid : RelayTarget
 }
 
@@ -111,10 +114,17 @@ private fun parseTarget(intent: Intent): RelayTarget = when (intent.action) {
         (intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri)
             ?.let { RelayTarget.Install(it) } ?: RelayTarget.Invalid
 
-    Intent.ACTION_SEND_MULTIPLE ->
+    Intent.ACTION_SEND_MULTIPLE -> {
         @Suppress("DEPRECATION")
-        (intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)?.firstOrNull())
-            ?.let { RelayTarget.Install(it) } ?: RelayTarget.Invalid
+        val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+            ?.filterNotNull()
+            .orEmpty()
+        when (uris.size) {
+            0 -> RelayTarget.Invalid
+            1 -> RelayTarget.Install(uris.first())
+            else -> RelayTarget.Batch(uris)
+        }
+    }
 
     Intent.ACTION_DELETE, Intent.ACTION_UNINSTALL_PACKAGE -> {
         val pkg = intent.data?.schemeSpecificPart
@@ -130,6 +140,12 @@ private fun RelayPanel(intent: Intent, onDone: () -> Unit) {
     val scope = rememberCoroutineScope()
     val accent = starAccent(TianjiFeature.star.order)
     val target = remember(intent) { parseTarget(intent) }
+
+    // 批量请求：整页交给批量队列页面（单包 / 卸载请求仍走下方既有流程）
+    if (target is RelayTarget.Batch) {
+        TianjiBatchScreen(uris = target.uris, onBack = onDone)
+        return
+    }
 
     var apk by remember(intent) { mutableStateOf<TianjiApk?>(null) }
     var parsing by remember(intent) { mutableStateOf(target is RelayTarget.Install) }

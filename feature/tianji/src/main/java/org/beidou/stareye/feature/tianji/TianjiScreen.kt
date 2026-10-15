@@ -58,6 +58,8 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.beidou.stareye.core.freeze.FreezeActions
+import org.beidou.stareye.core.freeze.FreezeState
 import org.beidou.stareye.core.shell.ShizukuShell
 import org.beidou.stareye.ui.components.StarGlyph
 import org.beidou.stareye.ui.components.glass
@@ -77,6 +79,8 @@ fun TianjiScreen(onBack: () -> Unit) {
     val accent = starAccent(TianjiFeature.star.order)
     var tab by remember { mutableStateOf(0) }
     var showLog by remember { mutableStateOf(false) }
+    // 批量安装页的入队 uri；非空时安装标签页切换为批量队列页面
+    var batchUris by remember { mutableStateOf<List<Uri>?>(null) }
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         // 顶栏
@@ -111,11 +115,11 @@ fun TianjiScreen(onBack: () -> Unit) {
 
         Spacer(Modifier.height(14.dp))
 
-        // 标签切换
+        // 标签切换（切换标签即退出批量页，随页面离开的协程作用域会取消批量任务）
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            TabChip("安装", tab == 0, accent) { tab = 0 }
-            TabChip("卸载", tab == 1, accent) { tab = 1 }
-            TabChip("设置", tab == 2, accent) { tab = 2 }
+            TabChip("安装", tab == 0, accent) { tab = 0; batchUris = null }
+            TabChip("卸载", tab == 1, accent) { tab = 1; batchUris = null }
+            TabChip("设置", tab == 2, accent) { tab = 2; batchUris = null }
         }
 
         Spacer(Modifier.height(14.dp))
@@ -123,7 +127,14 @@ fun TianjiScreen(onBack: () -> Unit) {
         // 用 weight 限定为「剩余空间」，避免子页 fillMaxSize 请求整屏高度而被父 Column 截断
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             when (tab) {
-                0 -> TianjiInstallTab(accent = accent)
+                0 -> {
+                    val uris = batchUris
+                    if (uris == null) {
+                        TianjiInstallTab(accent = accent, onBatch = { batchUris = it })
+                    } else {
+                        TianjiBatchScreen(uris = uris, onBack = { batchUris = null })
+                    }
+                }
                 1 -> TianjiUninstallTab(accent = accent)
                 else -> TianjiSettingsTab(accent = accent)
             }
@@ -156,7 +167,7 @@ private fun TabChip(label: String, selected: Boolean, accent: Color, onClick: ()
 // ───────────────────────── 安装标签页 ─────────────────────────
 
 @Composable
-private fun TianjiInstallTab(accent: Color) {
+private fun TianjiInstallTab(accent: Color, onBatch: (List<Uri>) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -187,8 +198,14 @@ private fun TianjiInstallTab(accent: Color) {
         rivalExists = TianjiDefaultInstaller.hasRival(context)
     }
 
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        if (uri == null) return@rememberLauncherForActivityResult
+    // 文件选择支持多选：选 1 个保持既有单包流程，选多个进入批量页面
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri> ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        if (uris.size > 1) {
+            onBatch(uris)
+            return@rememberLauncherForActivityResult
+        }
+        val uri = uris.first()
         scope.launch {
             parsing = true
             message = ""
@@ -217,16 +234,30 @@ private fun TianjiInstallTab(accent: Color) {
         val splits = info.splitFiles.filter { it.absolutePath in selectedSplits }
         installing = true
         message = ""
+        // 安装前的冻结状态：覆盖安装不会自动清除挂起 / 隐藏 / 禁用
+        val wasFrozen = FreezeState.isFrozen(context, info.packageName)
         scope.launch {
             val result = withContext(Dispatchers.IO) {
                 TianjiInstaller.install(context, info, splits) { s -> stage = s }
             }
             installing = false
             stage = ""
+            // 与瑶光 / 天璇的联动：安装成功后按设置解冻原本被冻结的目标应用
+            var unfreezeNote = ""
+            if (result.isSuccess && wasFrozen && TianjiPrefs.options(context).unfreezeAfterInstall) {
+                val unfreeze = withContext(Dispatchers.IO) {
+                    FreezeActions.unfreeze(context, info.packageName)
+                }
+                unfreezeNote = if (unfreeze.isSuccess) {
+                    " · 已自动解冻该应用"
+                } else {
+                    " · 自动解冻失败（${unfreeze.exceptionOrNull()?.message ?: "未知原因"}）"
+                }
+            }
             val detail = result.fold(
                 onSuccess = { it.ifBlank { "成功" } },
                 onFailure = { "失败：${it.message ?: "未知错误"}" },
-            )
+            ) + unfreezeNote
             message = detail
             TianjiLog.add(
                 context,
@@ -292,17 +323,24 @@ private fun TianjiInstallTab(accent: Color) {
 
         Spacer(Modifier.height(14.dp))
 
-        // 选择安装包
+        // 选择安装包（支持多选批量安装）
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .glass(shape = RoundedCornerShape(20.dp))
-                .clickable(enabled = !parsing && !installing) { picker.launch(arrayOf("*/*")) }
+                .clickable(enabled = !parsing && !installing) {
+                    picker.launch(
+                        arrayOf(
+                            "application/vnd.android.package-archive",
+                            "application/octet-stream",
+                        ),
+                    )
+                }
                 .padding(vertical = 18.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                if (parsing) "解析中…" else "＋ 选择安装包（APK / APKS / XAPK）",
+                if (parsing) "解析中…" else "＋ 选择安装包（APK / APKS / XAPK · 可多选批量）",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (parsing) StarWhite.copy(alpha = 0.4f) else accent,
@@ -313,6 +351,10 @@ private fun TianjiInstallTab(accent: Color) {
             Spacer(Modifier.height(12.dp))
             Text(message, style = MaterialTheme.typography.bodySmall, color = StarWhite.copy(alpha = 0.85f))
         }
+
+        // SAF 目录选择：授权常用目录后直接勾选安装包批量入队
+        Spacer(Modifier.height(12.dp))
+        TianjiSafDirCard(accent = accent, onEnqueue = onBatch)
 
         apk?.let { info ->
             Spacer(Modifier.height(14.dp))
@@ -553,6 +595,12 @@ private fun DefaultInstallerCard(
  */
 @Composable
 fun TianjiApkCard(apk: TianjiApk, accent: Color) {
+    val context = LocalContext.current
+    // 目标应用当前的冻结状态（core:freeze 统一判定，与瑶光 / 天璇 / 玉衡口径一致）
+    val freezeLabel = remember(apk.packageName) {
+        FreezeState.flags(context, apk.packageName).kind
+            .takeIf { it != FreezeState.Kind.NONE }?.label
+    }
     Column(
         modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -609,6 +657,11 @@ fun TianjiApkCard(apk: TianjiApk, accent: Color) {
                 "设备已安装${apk.installedVersionName?.let { " v$it" } ?: ""} · ${apk.versionChange ?: "覆盖安装"}",
                 StarBlue,
             )
+        }
+
+        // 与被冻结应用的联动提示
+        if (freezeLabel != null) {
+            WarningRow("该应用当前$freezeLabel，安装完成后将按设置自动解冻", StarGold)
         }
 
         Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.08f)))

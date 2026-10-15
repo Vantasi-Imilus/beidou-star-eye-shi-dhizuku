@@ -18,6 +18,8 @@
     <uses-permission
         android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
         tools:ignore="ProtectedPermissions" />
+    <!-- 开机自启：恢复自动冻结服务并重排延时冻结计划 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
 
@@ -85,6 +87,20 @@
                 <action android:name="${applicationId}.action.FREEZE_AUTO" />
             </intent-filter>
         </receiver>
+
+        <!-- 开机自启：恢复自动冻结服务、重排延时冻结闹钟（闹钟不跨重启存活） -->
+        <receiver
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 延时冻结到期闹钟（应用自身 PendingIntent 投递，故不对外导出） -->
+        <receiver
+            android:name="org.beidou.stareye.feature.yaoguang.YaoguangDelayedFreezeReceiver"
+            android:exported="false" />
 
         <!-- 自动冻结常驻服务：监听息屏 / 亮屏；同时作为通知监听服务为「跳过有通知的应用」供数 -->
         <service

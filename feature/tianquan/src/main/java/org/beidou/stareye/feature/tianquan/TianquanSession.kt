@@ -75,7 +75,32 @@ class TianquanSession(
 
     val usingPty: Boolean get() = masterFd >= 0 || process != null
 
-    val isAlive: Boolean get() = !closed.get() && (process?.isAlive ?: (masterFd >= 0))
+    val isAlive: Boolean
+        get() = if (closed.get()) {
+            false
+        } else {
+            if (process != null) processAlive() else masterFd >= 0
+        }
+
+    /**
+     * 远程进程是否仍在运行。
+     *
+     * 不能直接用 [Process.isAlive]：标准实现靠捕获 `IllegalThreadStateException`
+     * 判断"未退出"，而 Shizuku 的远程 Process 在未退出时抛出的是
+     * `IllegalArgumentException("process hasn't exited")`（经 binder 回传）——
+     * 该异常会穿透 isAlive 并在 Compose 组合期间崩溃（真机实测：浮动窗）。
+     * 这里直接调 [Process.exitValue] 并按两种异常语义分别判定。
+     */
+    private fun processAlive(): Boolean = try {
+        process?.exitValue()
+        false // 能取到退出码 = 已退出
+    } catch (_: IllegalThreadStateException) {
+        true // 标准语义：进程仍在运行
+    } catch (e: IllegalArgumentException) {
+        e.message?.contains("hasn't exited") == true
+    } catch (_: Throwable) {
+        false
+    }
 
     /** 启动 shell 会话，须在工作线程调用 */
     fun start(): Result<Unit> = runCatching {

@@ -36,6 +36,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
 
+    // 浮动窗：ComposeView 挂到 overlay 窗口需手工注入 ViewTree LifecycleOwner / SavedStateRegistryOwner
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.savedstate)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)

@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-set "VERSION=0.1.0"
+set "VERSION=0.2.0"
 
 echo ==========================================
 echo   Beidou Star Eye - One-Click Build

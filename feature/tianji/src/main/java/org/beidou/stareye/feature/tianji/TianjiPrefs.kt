@@ -26,6 +26,8 @@ data class TianjiOptions(
     /** 归档安装时默认勾选全部分包 */
     val selectAllSplits: Boolean = true,
     val requireBiometrics: Boolean = false,
+    /** 安装完成后，若目标应用处于冻结（挂起/隐藏/禁用）则自动解冻 */
+    val unfreezeAfterInstall: Boolean = true,
 )
 
 /**
@@ -53,6 +55,7 @@ object TianjiPrefs {
             allowDowngrade = p.getBoolean("allow_downgrade", false),
             selectAllSplits = p.getBoolean("select_all_splits", true),
             requireBiometrics = p.getBoolean("require_biometrics", false),
+            unfreezeAfterInstall = p.getBoolean("unfreeze_after_install", true),
         )
     }
 
@@ -67,6 +70,7 @@ object TianjiPrefs {
             .putBoolean("allow_downgrade", o.allowDowngrade)
             .putBoolean("select_all_splits", o.selectAllSplits)
             .putBoolean("require_biometrics", o.requireBiometrics)
+            .putBoolean("unfreeze_after_install", o.unfreezeAfterInstall)
             .apply()
     }
 

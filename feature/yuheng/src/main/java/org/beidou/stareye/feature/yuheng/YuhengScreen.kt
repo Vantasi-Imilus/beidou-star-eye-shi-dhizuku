@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.beidou.stareye.core.freeze.FreezeState
 import org.beidou.stareye.ui.components.StarGlyph
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.components.rememberFreezeRevision
@@ -220,7 +221,14 @@ private fun SystemTab(
 // ═════════════════════ 应用 ═════════════════════
 
 /** 应用条目 */
-private data class AppEntry(val pkg: String, val label: String, val system: Boolean, val version: String)
+private data class AppEntry(
+    val pkg: String,
+    val label: String,
+    val system: Boolean,
+    val version: String,
+    /** 统一冻结形态标签（挂起/隐藏/禁用）；正常为 null —— 判定源为 core:freeze */
+    val freezeLabel: String?,
+)
 
 @Composable
 private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Unit) {
@@ -228,8 +236,10 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<AppEntry?>(null) }
     var showSystem by remember { mutableStateOf(false) }
+    // 订阅跨中枢冻结变更：天璇 / 瑶光改动后列表角标自动刷新
+    val freezeRevision = rememberFreezeRevision()
 
-    val apps = remember(tick, showSystem) {
+    val apps = remember(tick, showSystem, freezeRevision) {
         val pm = context.packageManager
         pm.getInstalledApplications(0)
             .filter { if (showSystem) true else (it.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 }
@@ -239,6 +249,8 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
                     label = runCatching { ai.loadLabel(pm).toString() }.getOrDefault(ai.packageName),
                     system = (ai.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0,
                     version = runCatching { pm.getPackageInfo(ai.packageName, 0).versionName ?: "" }.getOrDefault(""),
+                    freezeLabel = FreezeState.flagsOf(ai).kind
+                        .takeIf { it != FreezeState.Kind.NONE }?.label,
                 )
             }
             .sortedBy { it.label.lowercase() }
@@ -299,6 +311,18 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    if (app.freezeLabel != null) {
+                        Text(
+                            "❄ ${app.freezeLabel}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = StarGold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(StarGold.copy(alpha = 0.12f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
                     Text(if (app.system) "系统" else "用户", style = MaterialTheme.typography.labelSmall, color = if (app.system) StarGold else accent)
                 }
             }
@@ -322,12 +346,17 @@ private fun AppDetailPage(
     val states = remember(tick, app.pkg, freezeRevision) {
         ops.associate { it.id to YuhengOps.appState(context, it.id, app.pkg) }
     }
+    // 统一冻结形态（core:freeze 判定）：与天璇 / 瑶光显示口径一致
+    val freezeLabel = remember(tick, app.pkg, freezeRevision) {
+        FreezeState.flags(context, app.pkg).kind.takeIf { it != FreezeState.Kind.NONE }?.label
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         YuhengSection(app.label, accent) {
             YuhengInfoRow("包名", app.pkg)
             YuhengInfoRow("版本", app.version.ifBlank { "—" })
             YuhengInfoRow("类型", if (app.system) "系统应用" else "用户应用")
+            YuhengInfoRow("冻结状态", freezeLabel ?: "正常")
         }
 
         YuhengSection("批量策略", accent) {

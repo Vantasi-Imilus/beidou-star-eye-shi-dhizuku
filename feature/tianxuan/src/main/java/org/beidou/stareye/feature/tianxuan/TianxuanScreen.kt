@@ -72,18 +72,42 @@ import org.beidou.stareye.ui.theme.starAccent
 @Composable
 fun TianxuanScreen(onBack: () -> Unit) {
     var selected by remember { mutableStateOf<TianxuanApp?>(null) }
+    var componentApp by remember { mutableStateOf<TianxuanApp?>(null) }
+    var showResidue by remember { mutableStateOf(false) }
+    var editorApp by remember { mutableStateOf<TianxuanApp?>(null) }
 
-    if (selected == null) {
-        AppListScreen(onBack = onBack, onOpen = { selected = it })
-    } else {
-        AppDetailScreen(app = selected!!, onBack = { selected = null })
+    when {
+        editorApp != null -> TianxuanApkEditorScreen(
+            app = editorApp!!,
+            onBack = { editorApp = null },
+        )
+
+        showResidue -> TianxuanResidueScreen(onBack = { showResidue = false })
+
+        componentApp != null -> TianxuanComponentScreen(
+            app = componentApp!!,
+            onBack = { componentApp = null },
+        )
+
+        selected != null -> AppDetailScreen(
+            app = selected!!,
+            onBack = { selected = null },
+            onOpenComponents = { componentApp = it },
+            onOpenEditor = { editorApp = it },
+        )
+
+        else -> AppListScreen(
+            onBack = onBack,
+            onOpen = { selected = it },
+            onOpenResidue = { showResidue = true },
+        )
     }
 }
 
 // ───────────────────────── 应用列表 ─────────────────────────
 
 @Composable
-private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit) {
+private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onOpenResidue: () -> Unit) {
     val context = LocalContext.current
     val accent = starAccent(TianxuanFeature.star.order)
 
@@ -155,6 +179,16 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit) {
                     .padding(horizontal = 12.dp, vertical = 8.dp),
             ) {
                 Text("操作记录", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = accent)
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(StarGold.copy(alpha = 0.14f))
+                    .clickable { onOpenResidue() }
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            ) {
+                Text("残留扫描", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = StarGold)
             }
         }
 
@@ -330,7 +364,12 @@ private fun AppIcon(bitmap: Bitmap?, accent: Color, size: androidx.compose.ui.un
 // ───────────────────────── 应用详情 ─────────────────────────
 
 @Composable
-private fun AppDetailScreen(app: TianxuanApp, onBack: () -> Unit) {
+private fun AppDetailScreen(
+    app: TianxuanApp,
+    onBack: () -> Unit,
+    onOpenComponents: (TianxuanApp) -> Unit,
+    onOpenEditor: (TianxuanApp) -> Unit,
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val accent = starAccent(TianxuanFeature.star.order)
@@ -340,6 +379,18 @@ private fun AppDetailScreen(app: TianxuanApp, onBack: () -> Unit) {
     var busy by remember { mutableStateOf<String?>(null) }
     var message by remember { mutableStateOf("") }
     var pendingAction by remember { mutableStateOf<String?>(null) }
+
+    // 签名信息（懒加载：展开后读取并缓存）
+    var sigExpanded by remember { mutableStateOf(false) }
+    var sigList by remember { mutableStateOf<List<TianxuanSignature>?>(null) }
+    var sigLoading by remember { mutableStateOf(false) }
+    LaunchedEffect(sigExpanded) {
+        if (sigExpanded && sigList == null) {
+            sigLoading = true
+            sigList = withContext(Dispatchers.IO) { TianxuanManager.signatureInfo(context, app.packageName) }
+            sigLoading = false
+        }
+    }
 
     // 订阅跨中枢冻结变更：瑶光 / 玉衡改动后此处自动重读
     val freezeRevision = rememberFreezeRevision()
@@ -361,12 +412,13 @@ private fun AppDetailScreen(app: TianxuanApp, onBack: () -> Unit) {
             val r = withContext(Dispatchers.IO) { block() }
             busy = null
             val ok = r.isSuccess
+            val exportAction = name == "导出APK" || name == "导出APKs"
             val detail = if (ok) {
-                (r.getOrNull() as? String)?.takeIf { it.isNotBlank() && name == "导出APK" } ?: "成功"
+                (r.getOrNull() as? String)?.takeIf { it.isNotBlank() && exportAction } ?: "成功"
             } else {
                 "失败：${r.exceptionOrNull()?.message ?: "未知错误"}"
             }
-            message = if (name == "导出APK" && ok) "已导出：$detail" else detail
+            message = if (exportAction && ok) "已导出：$detail" else detail
             record(name, ok, detail)
             if (name == "冻结" || name == "解冻") {
                 frozen = withContext(Dispatchers.IO) { TianxuanManager.isFrozen(context, app.packageName) }
@@ -435,6 +487,15 @@ private fun AppDetailScreen(app: TianxuanApp, onBack: () -> Unit) {
             ActionButton("导出 APK", accent, Modifier.fillMaxWidth(), busy == "导出APK") {
                 runAction("导出APK") { TianxuanManager.exportApk(context, app) }
             }
+            ActionButton("导出全部（.apks）", accent, Modifier.fillMaxWidth(), busy == "导出APKs") {
+                runAction("导出APKs") { TianxuanManager.exportAllApks(context, app) }
+            }
+            ActionButton("APK 编辑", StarGold, Modifier.fillMaxWidth(), false) {
+                onOpenEditor(app)
+            }
+            ActionButton("组件管理", StarBlue, Modifier.fillMaxWidth(), false) {
+                onOpenComponents(app)
+            }
 
             if (busy != null) {
                 Text("正在执行「$busy」…", style = MaterialTheme.typography.labelMedium, color = StarWhite.copy(alpha = 0.7f))
@@ -465,6 +526,57 @@ private fun AppDetailScreen(app: TianxuanApp, onBack: () -> Unit) {
             InfoRow("APK 大小", app.sourceDir?.let { TianxuanManager.apkSizeBytes(app)?.let { formatBytes(it) } } ?: "—")
             InfoRow("APK 路径", app.sourceDir ?: "—")
             InfoRow("数据目录", app.dataDir ?: "—")
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // 签名信息（懒加载）
+        Column(
+            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text("✦ 签名信息", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = StarGold)
+            Text(
+                "APK 的签名证书用于校验应用身份与安装来源，展开后从系统签名信息中读取。",
+                style = MaterialTheme.typography.bodySmall,
+                color = StarWhite.copy(alpha = 0.5f),
+            )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(accent.copy(alpha = 0.15f))
+                    .clickable { sigExpanded = !sigExpanded }
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+            ) {
+                Text(
+                    if (sigExpanded) "收起签名信息" else "展开签名信息",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = accent,
+                )
+            }
+            if (sigExpanded) {
+                when {
+                    sigLoading -> Text("正在读取签名…", style = MaterialTheme.typography.bodySmall, color = StarWhite.copy(alpha = 0.6f))
+                    sigList.isNullOrEmpty() -> Text(
+                        "未获取到签名信息（可能为系统预装或未签名应用）",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = StarWhite.copy(alpha = 0.6f),
+                    )
+
+                    else -> {
+                        val list = sigList!!
+                        Text(
+                            "共 ${list.size} 个签名者",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = StarWhite.copy(alpha = 0.5f),
+                        )
+                        list.forEachIndexed { index, sig ->
+                            SignerBlock(index + 1, list.size, sig, accent)
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -527,6 +639,49 @@ private fun InfoRow(label: String, value: String) {
             fontFamily = FontFamily.Monospace,
             color = StarWhite.copy(alpha = 0.85f),
             modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+// ───────────────────────── 签名信息 ─────────────────────────
+
+/** 单个签名者的信息卡（多签名者时带序号） */
+@Composable
+private fun SignerBlock(index: Int, total: Int, sig: TianxuanSignature, accent: Color) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.05f))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (total > 1) {
+            Text(
+                "签名者 #$index",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = accent,
+            )
+        }
+        SigInfoRow("签名者", sig.signerDn)
+        SigInfoRow("颁发者", sig.issuerDn)
+        SigInfoRow("SHA-256", sig.sha256)
+        SigInfoRow("SHA-1", sig.sha1)
+        SigInfoRow("有效期", "${formatTime(sig.validFrom)} 至 ${formatTime(sig.validUntil)}")
+        SigInfoRow("序列号", sig.serialNumber)
+    }
+}
+
+@Composable
+private fun SigInfoRow(label: String, value: String) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = StarWhite.copy(alpha = 0.45f))
+        Text(
+            value,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            color = StarWhite.copy(alpha = 0.85f),
         )
     }
 }
@@ -602,12 +757,3 @@ private val timeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault(
 
 private fun formatTime(millis: Long): String =
     if (millis <= 0) "—" else timeFormat.format(Date(millis))
-
-private fun formatBytes(bytes: Long): String {
-    if (bytes < 1024) return "$bytes B"
-    val kb = bytes / 1024.0
-    if (kb < 1024) return String.format(Locale.getDefault(), "%.1f KB", kb)
-    val mb = kb / 1024.0
-    if (mb < 1024) return String.format(Locale.getDefault(), "%.1f MB", mb)
-    return String.format(Locale.getDefault(), "%.2f GB", mb / 1024.0)
-}

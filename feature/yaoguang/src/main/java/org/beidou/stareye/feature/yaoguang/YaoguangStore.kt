@@ -58,6 +58,7 @@ object YaoguangStore {
     private const val K_API_HAIL_COMPAT = "api_hail_compat"
     private const val K_API_KEY = "api_key"
     private const val K_AUTO_FROZEN = "auto_frozen"
+    private const val K_PENDING_AUTO = "pending_auto_freeze_at"
     private const val K_FUZZY = "fuzzy_search"
     private const val K_NINE_KEY = "nine_key_search"
 
@@ -318,6 +319,15 @@ object YaoguangStore {
 
     fun setAutoFrozen(context: Context, packageNames: Collection<String>) {
         writeList(context, K_AUTO_FROZEN, packageNames.toList())
+    }
+
+    // ── 自动冻结的待执行计划（息屏延迟触发；进程被杀后由闹钟恢复） ──
+
+    /** 已排定的自动冻结触发时刻（毫秒）；0 表示当前无待执行计划 */
+    fun pendingAutoFreezeAt(context: Context): Long = prefs(context).getLong(K_PENDING_AUTO, 0L)
+
+    fun setPendingAutoFreezeAt(context: Context, atMillis: Long) {
+        prefs(context).edit().putLong(K_PENDING_AUTO, atMillis).apply()
     }
 
     // ── 操作记录 ──
