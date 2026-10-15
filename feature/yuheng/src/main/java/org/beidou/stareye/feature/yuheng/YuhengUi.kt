@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 玉衡中枢 —— 通用界面组件。
@@ -48,7 +48,7 @@ import org.beidou.stareye.ui.theme.StarWhite
 @Composable
 fun YuhengSection(title: String, accent: Color, content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
     ) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
         Spacer(Modifier.height(8.dp))
@@ -105,7 +105,7 @@ fun YuhengActionRow(title: String, detail: String, color: Color, enabled: Boolea
             fontWeight = FontWeight.Bold,
             color = if (enabled) color else StarWhite.copy(alpha = 0.3f),
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = if (enabled) 0.16f else 0.06f))
                 .clickable(enabled = enabled, onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -122,7 +122,7 @@ fun YuhengNavRow(title: String, detail: String, color: Color, badge: String = ""
             fontWeight = FontWeight.Bold,
             color = color,
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = 0.14f))
                 .clickable(onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -150,7 +150,7 @@ fun YuhengEnumRow(
             fontWeight = FontWeight.Bold,
             color = color,
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = 0.14f))
                 .clickable { open = true }
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -170,7 +170,7 @@ fun YuhengEnumRow(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .background(if (index == selectedIndex) color.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.04f))
                                 .clickable {
                                     onSelect(index)
@@ -212,7 +212,7 @@ fun YuhengTextRow(
             fontWeight = FontWeight.Bold,
             color = color,
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = 0.14f))
                 .clickable { text = value; open = true }
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -301,7 +301,7 @@ fun YuhengFeatureRenderer(
 fun YuhengTabChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(if (selected) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -336,7 +336,7 @@ fun YuhengInfoRow(label: String, value: String) {
 @Composable
 fun YuhengDangerRow(text: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+        modifier = Modifier.fillMaxWidth().clip(beidouShape(12.dp))
             .background(StarGold.copy(alpha = 0.10f)).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

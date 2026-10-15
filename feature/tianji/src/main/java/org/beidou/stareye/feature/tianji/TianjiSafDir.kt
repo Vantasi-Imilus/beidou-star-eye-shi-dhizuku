@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import kotlinx.coroutines.withContext
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 
 /** SAF 目录内的一个安装包条目 */
 data class TianjiSafEntry(
@@ -187,7 +187,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -199,7 +199,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = accent,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
+                        .clip(beidouShape(50))
                         .clickable { treeLauncher.launch(null) }
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 )
@@ -209,7 +209,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = Color(0xFFFF6B9D),
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
+                        .clip(beidouShape(50))
                         .clickable {
                             TianjiSafDir.clearTree(context)
                             tree = null
@@ -232,7 +232,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(beidouShape(14.dp))
                         .background(accent.copy(alpha = 0.16f))
                         .clickable { treeLauncher.launch(null) }
                         .padding(vertical = 12.dp),
@@ -273,7 +273,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(beidouShape(12.dp))
                             .clickable { selected = if (checked) selected - key else selected + key }
                             .padding(vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -303,7 +303,7 @@ fun TianjiSafDirCard(accent: Color, onEnqueue: (List<Uri>) -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(beidouShape(14.dp))
                             .background(StarGold.copy(alpha = 0.16f))
                             .clickable {
                                 val uris = list.filter { it.uri.toString() in selected }.map { it.uri }

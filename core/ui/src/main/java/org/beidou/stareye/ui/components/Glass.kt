@@ -29,30 +29,36 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import org.beidou.stareye.core.model.FeatureStatus
+import org.beidou.stareye.ui.theme.GlassHighlight
 import org.beidou.stareye.ui.theme.GlassTint
 import org.beidou.stareye.ui.theme.StarBlue
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 液态玻璃 / 毛玻璃表面修饰符：
  * 外发光阴影 + 半透明渐变底 + 高光描边，营造通透的玻璃质感。
+ *
+ * 高光与描边取自主题 token（[GlassHighlight]），反向星界下自动转为暗色系；
+ * 圆角由 [beidouShape] 提供，锐利模式下收为直角。
  */
+@Composable
 fun Modifier.glass(
-    shape: Shape = RoundedCornerShape(28.dp),
+    shape: Shape = beidouShape(28.dp),
     tint: Color = GlassTint,
 ): Modifier = this
     .shadow(
         elevation = 24.dp,
         shape = shape,
         ambientColor = StarBlue.copy(alpha = 0.10f),
-        spotColor = Color.White.copy(alpha = 0.16f),
+        spotColor = GlassHighlight.copy(alpha = 0.16f),
     )
     .clip(shape)
     .background(
         Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.16f),
+                GlassHighlight.copy(alpha = 0.16f),
                 tint,
-                Color.White.copy(alpha = 0.05f),
+                GlassHighlight.copy(alpha = 0.05f),
             ),
             start = Offset.Zero,
             end = Offset.Infinite,
@@ -62,9 +68,9 @@ fun Modifier.glass(
         width = 1.dp,
         brush = Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.60f),
-                Color.White.copy(alpha = 0.08f),
-                Color.White.copy(alpha = 0.35f),
+                GlassHighlight.copy(alpha = 0.60f),
+                GlassHighlight.copy(alpha = 0.08f),
+                GlassHighlight.copy(alpha = 0.35f),
             ),
         ),
         shape = shape,
@@ -104,9 +110,9 @@ fun StatusChip(status: FeatureStatus, accent: Color) {
     }
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(color.copy(alpha = 0.14f))
-            .border(1.dp, color.copy(alpha = 0.35f), RoundedCornerShape(50))
+            .border(1.dp, color.copy(alpha = 0.35f), beidouShape(50))
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -62,6 +61,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天璇中枢 —— App Manager（应用管理）界面。
@@ -142,7 +142,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -158,7 +158,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
             }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable(enabled = !loading) { refreshKey++ }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -173,7 +173,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
             Spacer(Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable { showLog = true }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -183,7 +183,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
             Spacer(Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(StarGold.copy(alpha = 0.14f))
                     .clickable { onOpenResidue() }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -196,7 +196,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
 
         // 能力状态
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             CapabilityRow("天枢中枢（Shizuku）", if (shizukuReady) "已就绪" else "未就绪", if (shizukuReady) StarBlue else Color.Gray)
@@ -209,7 +209,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
         TextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)),
             placeholder = { Text("搜索应用名或包名…", color = StarWhite.copy(alpha = 0.35f)) },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -246,7 +246,7 @@ private fun AppListScreen(onBack: () -> Unit, onOpen: (TianxuanApp) -> Unit, onO
         } else {
             if (apps.size <= 1) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)).padding(14.dp),
+                    modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)).padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text("✦ 只看到本应用？", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = StarGold)
@@ -288,7 +288,7 @@ private fun CapabilityRow(label: String, value: String, color: Color) {
 private fun FilterChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(if (selected) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -307,7 +307,7 @@ private fun AppRow(app: TianxuanApp, accent: Color, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(20.dp))
+            .glass(shape = beidouShape(20.dp))
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -349,11 +349,11 @@ private fun AppIcon(bitmap: Bitmap?, accent: Color, size: androidx.compose.ui.un
         Image(
             bitmap = bitmap.asImageBitmap(),
             contentDescription = null,
-            modifier = Modifier.size(size).clip(RoundedCornerShape(size / 3)),
+            modifier = Modifier.size(size).clip(beidouShape(size / 3)),
         )
     } else {
         Box(
-            modifier = Modifier.size(size).clip(RoundedCornerShape(size / 3)).background(accent.copy(alpha = 0.15f)),
+            modifier = Modifier.size(size).clip(beidouShape(size / 3)).background(accent.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
             StarGlyph(color = accent, size = size / 2)
@@ -434,7 +434,7 @@ private fun AppDetailScreen(
     ) {
         // 顶栏
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -445,7 +445,7 @@ private fun AppDetailScreen(
 
         // 应用头
         Row(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AppIcon(app.icon, accent, 56.dp)
@@ -467,7 +467,7 @@ private fun AppDetailScreen(
 
         // 操作按钮
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("✦ 应用操作", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = accent)
@@ -514,7 +514,7 @@ private fun AppDetailScreen(
 
         // 详情信息
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text("✦ 应用详情", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = StarGold)
@@ -532,7 +532,7 @@ private fun AppDetailScreen(
 
         // 签名信息（懒加载）
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text("✦ 签名信息", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = StarGold)
@@ -543,7 +543,7 @@ private fun AppDetailScreen(
             )
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable { sigExpanded = !sigExpanded }
                     .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -614,7 +614,7 @@ private fun AppDetailScreen(
 private fun ActionButton(label: String, color: Color, modifier: Modifier, busy: Boolean, onClick: () -> Unit) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(beidouShape(16.dp))
             .background(color.copy(alpha = 0.16f))
             .clickable(enabled = !busy, onClick = onClick)
             .padding(vertical = 14.dp),
@@ -651,7 +651,7 @@ private fun SignerBlock(index: Int, total: Int, sig: TianxuanSignature, accent: 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(beidouShape(14.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -707,7 +707,7 @@ private fun OperationLogDialog(onDismiss: () -> Unit) {
                 ) {
                     entries.asReversed().forEach { e ->
                         Column(
-                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.05f)).padding(10.dp),
+                            modifier = Modifier.fillMaxWidth().clip(beidouShape(12.dp)).background(Color.White.copy(alpha = 0.05f)).padding(10.dp),
                         ) {
                             Row {
                                 Text(

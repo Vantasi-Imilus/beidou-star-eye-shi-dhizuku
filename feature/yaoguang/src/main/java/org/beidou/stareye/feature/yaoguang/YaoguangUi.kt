@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +43,7 @@ import org.beidou.stareye.core.freeze.FreezeState
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.DeepSpaceLight
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 瑶光中枢的星空玻璃 UI 原语（与玉衡 / 天璇同一视觉语言）。
@@ -52,7 +52,7 @@ import org.beidou.stareye.ui.theme.StarWhite
 @Composable
 fun YaoguangSection(title: String, accent: Color, content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
     ) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
         Spacer(Modifier.height(8.dp))
@@ -130,7 +130,7 @@ fun YaoguangActionRow(
             fontWeight = FontWeight.Bold,
             color = if (enabled) color else StarWhite.copy(alpha = 0.3f),
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = if (enabled) 0.16f else 0.06f))
                 .clickable(enabled = enabled, onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -157,7 +157,7 @@ fun YaoguangEnumRow(
             fontWeight = FontWeight.Bold,
             color = color,
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(color.copy(alpha = 0.14f))
                 .clickable { open = true }
                 .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -177,7 +177,7 @@ fun YaoguangEnumRow(
                             color = if (index == selectedIndex) color else StarWhite.copy(alpha = 0.85f),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .clickable { onSelect(index); open = false }
                                 .padding(horizontal = 8.dp, vertical = 10.dp),
                         )
@@ -194,7 +194,7 @@ fun YaoguangEnumRow(
 fun YaoguangChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(if (selected) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 7.dp),
@@ -224,7 +224,7 @@ fun YaoguangSearchField(
         cursorBrush = SolidColor(accent),
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(14.dp))
+            .glass(shape = beidouShape(14.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp),
         decorationBox = { inner ->
             Box {
@@ -250,7 +250,7 @@ fun YaoguangAppIcon(app: YaoguangApp, size: Dp = 44.dp) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = app.label,
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(size / 4)),
+                modifier = Modifier.fillMaxSize().clip(beidouShape(size / 4)),
                 colorFilter = if (app.frozen) {
                     ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
                 } else {
@@ -259,7 +259,7 @@ fun YaoguangAppIcon(app: YaoguangApp, size: Dp = 44.dp) {
             )
         } else {
             Box(
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(size / 4))
+                modifier = Modifier.fillMaxSize().clip(beidouShape(size / 4))
                     .background(Color.White.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -298,7 +298,7 @@ fun YaoguangStateBadge(app: YaoguangApp, accent: Color) {
     val color = if (app.frozen) accent else StarWhite.copy(alpha = 0.55f)
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(color.copy(alpha = 0.16f))
             .padding(horizontal = 8.dp, vertical = 2.dp),
     ) {

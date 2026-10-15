@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -64,6 +63,7 @@ import kotlinx.coroutines.withContext
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /** 输入框文本的同步镜像（非 Compose 状态，供 diff 即时读取） */
 private class TextMirror {
@@ -188,7 +188,7 @@ fun TianquanScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -220,7 +220,7 @@ fun TianquanScreen(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 12.dp)
-                .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(16.dp)),
+                .border(1.dp, Color.White.copy(alpha = 0.10f), beidouShape(16.dp)),
         ) {
             val density = androidx.compose.ui.platform.LocalDensity.current
             val charWpx = with(density) { (fontSize * 0.6f).dp.toPx() }
@@ -406,7 +406,7 @@ fun TianquanScreen(onBack: () -> Unit) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(beidouShape(12.dp))
                                 .background(if (index == activeIndex) accent.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f))
                                 .clickable {
                                     activeIndex = index
@@ -434,7 +434,7 @@ fun TianquanScreen(onBack: () -> Unit) {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFFFF6B9D),
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
+                                    .clip(beidouShape(50))
                                     .background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                                     .clickable { closeSession(s) }
                                     .padding(horizontal = 10.dp, vertical = 4.dp),
@@ -521,7 +521,7 @@ private fun lineToRow(emu: TianquanEmulator, line: Int): TerminalRow? {
 private fun Chip(label: String, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(accent.copy(alpha = 0.15f))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -536,7 +536,7 @@ private fun RowScope.KeyButton(label: String, color: Color, onClick: () -> Unit)
         modifier = Modifier
             .weight(1f)
             .height(36.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(beidouShape(10.dp))
             .background(color.copy(alpha = 0.16f))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -595,7 +595,7 @@ private fun TerminalSettingsDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(beidouShape(10.dp))
                             .background(if (c == channel) accent.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.05f))
                             .clickable { onChannel(c) }
                             .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -631,7 +631,7 @@ private fun TerminalSettingsDialog(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .background(if (t.id == theme.id) accent.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.06f))
                                 .clickable { onTheme(t) }
                                 .padding(vertical = 8.dp),
@@ -648,7 +648,7 @@ private fun TerminalSettingsDialog(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .background(if (cs == cursorStyle) accent.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.06f))
                                 .clickable { onCursorStyle(cs) }
                                 .padding(vertical = 8.dp),

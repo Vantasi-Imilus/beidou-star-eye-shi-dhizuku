@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -77,6 +76,7 @@ import org.beidou.stareye.ui.theme.BeidouTheme
 import org.beidou.stareye.ui.theme.DeepSpace
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天权中枢 —— 系统级悬浮终端（浮动窗）。
@@ -449,9 +449,9 @@ private fun FloatingTerminalContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(beidouShape(18.dp))
             .background(DeepSpace)
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp)),
+            .border(1.dp, Color.White.copy(alpha = 0.12f), beidouShape(18.dp)),
     ) {
         Column(Modifier.fillMaxSize()) {
             // ── 标题栏（拖动把手）──

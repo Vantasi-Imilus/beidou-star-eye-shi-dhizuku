@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -54,6 +53,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天璇中枢 —— APK 文件级编辑页。
@@ -157,7 +157,7 @@ fun TianxuanApkEditorScreen(app: TianxuanApp, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -173,7 +173,7 @@ fun TianxuanApkEditorScreen(app: TianxuanApp, onBack: () -> Unit) {
             }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable(enabled = busy == null && apkFile != null) { save() }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -205,7 +205,7 @@ fun TianxuanApkEditorScreen(app: TianxuanApp, onBack: () -> Unit) {
         } else if (loadError.isNotEmpty()) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)).padding(14.dp),
+                    modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)).padding(14.dp),
                 ) {
                     Text("✦ $loadError（需要天枢中枢就绪）", style = MaterialTheme.typography.bodySmall, color = StarGold)
                 }
@@ -213,13 +213,13 @@ fun TianxuanApkEditorScreen(app: TianxuanApp, onBack: () -> Unit) {
         } else {
             // 操作卡
             Column(
-                modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(14.dp),
+                modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(50))
+                            .clip(beidouShape(50))
                             .background(StarBlue.copy(alpha = 0.16f))
                             .clickable(enabled = busy == null) { pickAdd = true; picker.launch(arrayOf("*/*")) }
                             .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -228,7 +228,7 @@ fun TianxuanApkEditorScreen(app: TianxuanApp, onBack: () -> Unit) {
                     }
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(50))
+                            .clip(beidouShape(50))
                             .background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                             .clickable(enabled = busy == null && (deleted.isNotEmpty() || replaced.isNotEmpty() || added.isNotEmpty())) {
                                 deleted = emptySet()
@@ -374,7 +374,7 @@ private fun EntryRow(
     onUndoReplace: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(18.dp)).padding(12.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(18.dp)).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -438,7 +438,7 @@ private fun EntryRow(
 @Composable
 private fun AddedRow(name: String, sourceName: String, busy: Boolean, onRemove: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(18.dp)).padding(12.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(18.dp)).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -474,7 +474,7 @@ private fun EntryBadge(label: String, color: Color) {
         style = MaterialTheme.typography.labelSmall,
         color = color,
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(beidouShape(6.dp))
             .background(Color.White.copy(alpha = 0.06f))
             .padding(horizontal = 6.dp, vertical = 1.dp),
     )
@@ -484,7 +484,7 @@ private fun EntryBadge(label: String, color: Color) {
 private fun RowChip(label: String, color: Color, busy: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(color.copy(alpha = 0.13f))
             .clickable(enabled = !busy, onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),

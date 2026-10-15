@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,6 +31,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 中枢详情页：展示功能元数据与集成状态占位。
@@ -53,7 +53,7 @@ fun FeatureDetailScreen(feature: Feature, onBack: () -> Unit) {
         ) {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier.glass(shape = RoundedCornerShape(50)),
+                modifier = Modifier.glass(shape = beidouShape(50)),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -99,7 +99,7 @@ fun FeatureDetailScreen(feature: Feature, onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(24.dp))
+                .glass(shape = beidouShape(24.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -141,7 +141,7 @@ fun FeatureDetailScreen(feature: Feature, onBack: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(20.dp))
+                .glass(shape = beidouShape(20.dp))
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {

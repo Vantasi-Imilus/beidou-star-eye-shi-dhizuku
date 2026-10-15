@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -67,6 +66,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天玑中枢 —— InstallerX（现代化安装器）界面。
@@ -88,7 +88,7 @@ fun TianjiScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -104,7 +104,7 @@ fun TianjiScreen(onBack: () -> Unit) {
             }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable { showLog = true }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -150,7 +150,7 @@ fun TianjiScreen(onBack: () -> Unit) {
 private fun TabChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(if (selected) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f))
             .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 8.dp),
@@ -273,7 +273,7 @@ private fun TianjiInstallTab(accent: Color, onBatch: (List<Uri>) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         // 通道状态
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             StatusRow(
@@ -327,7 +327,7 @@ private fun TianjiInstallTab(accent: Color, onBatch: (List<Uri>) -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(20.dp))
+                .glass(shape = beidouShape(20.dp))
                 .clickable(enabled = !parsing && !installing) {
                     picker.launch(
                         arrayOf(
@@ -379,7 +379,7 @@ private fun TianjiInstallTab(accent: Color, onBatch: (List<Uri>) -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .glass(shape = RoundedCornerShape(20.dp))
+                    .glass(shape = beidouShape(20.dp))
                     .clickable(enabled = !installing && TianjiPrefs.isBlocked(context, info.packageName).not()) {
                         if (TianjiPrefs.options(context).requireBiometrics) {
                             showBiometricDialog = true
@@ -452,7 +452,7 @@ private fun SplitSelector(
     onClear: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -462,14 +462,14 @@ private fun SplitSelector(
                 "全选",
                 style = MaterialTheme.typography.labelMedium,
                 color = accent,
-                modifier = Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onSelectAll).padding(horizontal = 10.dp, vertical = 4.dp),
+                modifier = Modifier.clip(beidouShape(50)).clickable(onClick = onSelectAll).padding(horizontal = 10.dp, vertical = 4.dp),
             )
             Spacer(Modifier.width(6.dp))
             Text(
                 "清空",
                 style = MaterialTheme.typography.labelMedium,
                 color = StarWhite.copy(alpha = 0.6f),
-                modifier = Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onClear).padding(horizontal = 10.dp, vertical = 4.dp),
+                modifier = Modifier.clip(beidouShape(50)).clickable(onClick = onClear).padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
         splits.forEach { f ->
@@ -511,7 +511,7 @@ private fun DefaultInstallerCard(
     onManual: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -549,7 +549,7 @@ private fun DefaultInstallerCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(beidouShape(14.dp))
                         .background(Color(0xFFFF6B9D).copy(alpha = 0.16f))
                         .clickable(onClick = onUnregister)
                         .padding(vertical = 12.dp),
@@ -561,7 +561,7 @@ private fun DefaultInstallerCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(beidouShape(14.dp))
                         .background(accent.copy(alpha = 0.18f))
                         .clickable(onClick = onRegister)
                         .padding(vertical = 12.dp),
@@ -573,7 +573,7 @@ private fun DefaultInstallerCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(beidouShape(14.dp))
                         .background(accent.copy(alpha = 0.14f))
                         .clickable(onClick = onManual)
                         .padding(vertical = 12.dp),
@@ -602,7 +602,7 @@ fun TianjiApkCard(apk: TianjiApk, accent: Color) {
             .takeIf { it != FreezeState.Kind.NONE }?.label
     }
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -610,11 +610,11 @@ fun TianjiApkCard(apk: TianjiApk, accent: Color) {
                 Image(
                     bitmap = apk.icon.asImageBitmap(),
                     contentDescription = null,
-                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(18.dp)),
+                    modifier = Modifier.size(56.dp).clip(beidouShape(18.dp)),
                 )
             } else {
                 Box(
-                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(18.dp)).background(accent.copy(alpha = 0.15f)),
+                    modifier = Modifier.size(56.dp).clip(beidouShape(18.dp)).background(accent.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     StarGlyph(color = accent, size = 28.dp)
@@ -686,7 +686,7 @@ private fun WarningRow(text: String, color: Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(beidouShape(12.dp))
             .background(color.copy(alpha = 0.12f))
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -737,7 +737,7 @@ private fun TianjiLogDialog(onDismiss: () -> Unit) {
                 ) {
                     entries.asReversed().forEach { e ->
                         Column(
-                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.05f)).padding(10.dp),
+                            modifier = Modifier.fillMaxWidth().clip(beidouShape(12.dp)).background(Color.White.copy(alpha = 0.05f)).padding(10.dp),
                         ) {
                             Row {
                                 Text(

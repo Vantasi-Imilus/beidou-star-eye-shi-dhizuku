@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -49,6 +48,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天璇中枢 —— 组件管理页。
@@ -113,7 +113,7 @@ fun TianxuanComponentScreen(app: TianxuanApp, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -129,7 +129,7 @@ fun TianxuanComponentScreen(app: TianxuanApp, onBack: () -> Unit) {
             }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable(enabled = !loading) { refreshKey++ }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -161,7 +161,7 @@ fun TianxuanComponentScreen(app: TianxuanApp, onBack: () -> Unit) {
 
         if (!TianxuanManager.shizukuReady()) {
             Box(
-                modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)).padding(12.dp),
+                modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)).padding(12.dp),
             ) {
                 Text(
                     "✦ 启停组件需要天枢中枢（Shizuku）就绪；当前只读展示。",
@@ -235,7 +235,7 @@ fun TianxuanComponentScreen(app: TianxuanApp, onBack: () -> Unit) {
 private fun KindChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(if (selected) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -257,7 +257,7 @@ private fun ComponentRow(
     onToggle: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(18.dp)).padding(12.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(18.dp)).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -314,7 +314,7 @@ private fun ComponentBadge(label: String, color: Color) {
         style = MaterialTheme.typography.labelSmall,
         color = color,
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(beidouShape(6.dp))
             .background(Color.White.copy(alpha = 0.06f))
             .padding(horizontal = 6.dp, vertical = 1.dp),
     )

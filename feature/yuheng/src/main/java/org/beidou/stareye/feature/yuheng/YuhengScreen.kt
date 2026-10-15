@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -59,6 +58,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 private val TABS = listOf("系统", "应用", "用户", "限制", "密码", "网络", "设置")
 
@@ -95,7 +95,7 @@ fun YuhengScreen(onBack: () -> Unit) {
             ) {
                 IconButton(
                     onClick = { if (subPage != null) subPage = null else onBack() },
-                    modifier = Modifier.glass(shape = RoundedCornerShape(50)),
+                    modifier = Modifier.glass(shape = beidouShape(50)),
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
                 }
@@ -136,7 +136,7 @@ fun YuhengScreen(onBack: () -> Unit) {
 
             if (message.isNotEmpty()) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                    modifier = Modifier.fillMaxWidth().clip(beidouShape(12.dp))
                         .background(accent.copy(alpha = 0.12f))
                         .clickable { message = "" }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -276,7 +276,7 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
         TextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(14.dp)),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(14.dp)),
             placeholder = { Text("搜索应用名或包名…", color = StarWhite.copy(alpha = 0.35f)) },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -289,7 +289,7 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
             items(visible, key = { it.pkg }) { app ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp))
+                    modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp))
                         .clickable { selected = app }.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -317,7 +317,7 @@ private fun AppsTab(accent: Color, tick: Int, report: (YuhengCore.Result) -> Uni
                             style = MaterialTheme.typography.labelSmall,
                             color = StarGold,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(beidouShape(6.dp))
                                 .background(StarGold.copy(alpha = 0.12f))
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                         )
@@ -437,7 +437,7 @@ private fun AppPermissionList(pkg: String, accent: Color, tick: Int, report: (Yu
                     style = MaterialTheme.typography.labelSmall,
                     color = accent,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
+                        .clip(beidouShape(50))
                         .background(accent.copy(alpha = 0.14f))
                         .clickable {
                             val next = when (st) {
@@ -508,7 +508,7 @@ private fun UsersTab(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (op == "remove") Color(0xFFFF6B9D) else accent,
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(50))
+                                        .clip(beidouShape(50))
                                         .background((if (op == "remove") Color(0xFFFF6B9D) else accent).copy(alpha = 0.14f))
                                         .clickable { report(YuhengOps.userOperation(context, op, user)) }
                                         .padding(horizontal = 12.dp, vertical = 5.dp),
@@ -603,7 +603,7 @@ private fun RestrictionsTab(accent: Color, ownerReady: Boolean, tick: Int, repor
         TextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(14.dp)),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(14.dp)),
             placeholder = { Text("搜索限制项（共 ${YuhengRestrictions.all.size} 项）…", color = StarWhite.copy(alpha = 0.35f)) },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -762,7 +762,7 @@ private fun YuhengResetToken(accent: Color, tick: Int, report: (YuhengCore.Resul
                 "设置令牌",
                 style = MaterialTheme.typography.labelSmall,
                 color = accent,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(accent.copy(alpha = 0.14f))
+                modifier = Modifier.clip(beidouShape(50)).background(accent.copy(alpha = 0.14f))
                     .clickable {
                         val value = token.ifBlank { YuhengPrefs.generateKey() + YuhengPrefs.generateKey() }
                         report(YuhengOps.setResetToken(context, value))
@@ -773,7 +773,7 @@ private fun YuhengResetToken(accent: Color, tick: Int, report: (YuhengCore.Resul
                 "清除令牌",
                 style = MaterialTheme.typography.labelSmall,
                 color = Color(0xFFFF6B9D),
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
+                modifier = Modifier.clip(beidouShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                     .clickable { report(YuhengOps.setResetToken(context, null)) }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             )
@@ -801,7 +801,7 @@ private fun YuhengResetPassword(accent: Color, report: (YuhengCore.Result) -> Un
             "重置密码",
             style = MaterialTheme.typography.labelSmall,
             color = Color(0xFFFF6B9D),
-            modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.16f))
+            modifier = Modifier.clip(beidouShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.16f))
                 .clickable { report(YuhengOps.textWrite(context, "reset_password", pwd)) }
                 .padding(horizontal = 14.dp, vertical = 6.dp),
         )
@@ -908,7 +908,7 @@ private fun SettingsTab(accent: Color, tick: Int, report: (YuhengCore.Result) ->
                     "随机生成",
                     style = MaterialTheme.typography.labelSmall,
                     color = accent,
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(accent.copy(alpha = 0.14f))
+                    modifier = Modifier.clip(beidouShape(50)).background(accent.copy(alpha = 0.14f))
                         .clickable {
                             apiKey = YuhengPrefs.generateKey()
                             YuhengPrefs.setApi(context, apiOn, apiKey)
@@ -1023,7 +1023,7 @@ private fun SecurityLogPage(accent: Color, report: (YuhengCore.Result) -> Unit) 
                     "清空日志",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFFFF6B9D),
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
+                    modifier = Modifier.clip(beidouShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                         .clickable { YuhengPrefs.clearNetworkLog(context); tick++ }
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 )
@@ -1088,7 +1088,7 @@ private fun LockTaskPage(accent: Color, report: (YuhengCore.Result) -> Unit) {
                 Text(
                     "添加",
                     style = MaterialTheme.typography.labelSmall, color = accent,
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(accent.copy(alpha = 0.14f))
+                    modifier = Modifier.clip(beidouShape(50)).background(accent.copy(alpha = 0.14f))
                         .clickable {
                             if (pkgInput.isNotBlank()) {
                                 report(YuhengCore.call("添加白名单") {
@@ -1104,7 +1104,7 @@ private fun LockTaskPage(accent: Color, report: (YuhengCore.Result) -> Unit) {
                 Text(
                     "清空白名单",
                     style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6B9D),
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
+                    modifier = Modifier.clip(beidouShape(50)).background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                         .clickable {
                             report(YuhengCore.call("清空白名单") {
                                 YuhengCore.dpm(context).setLockTaskPackages(YuhengCore.admin(context), emptyArray())
@@ -1183,7 +1183,7 @@ private fun AccountManagementPage(accent: Color, report: (YuhengCore.Result) -> 
             Text(
                 "禁用管理",
                 style = MaterialTheme.typography.labelSmall, color = accent,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(accent.copy(alpha = 0.14f))
+                modifier = Modifier.clip(beidouShape(50)).background(accent.copy(alpha = 0.14f))
                     .clickable {
                         if (input.isNotBlank()) {
                             report(YuhengCore.call("禁用账号管理") {

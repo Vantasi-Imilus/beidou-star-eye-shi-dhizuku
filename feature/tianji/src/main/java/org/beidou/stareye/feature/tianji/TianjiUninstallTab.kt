@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,6 +51,7 @@ import org.beidou.stareye.ui.components.StarGlyph
 import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 
 /** 卸载页的条目 */
 data class UninstallEntry(
@@ -107,7 +107,7 @@ fun TianjiUninstallTab(accent: Color) {
                 fontWeight = FontWeight.SemiBold,
                 color = accent,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable { showSystem = !showSystem }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
@@ -119,7 +119,7 @@ fun TianjiUninstallTab(accent: Color) {
         TextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)),
             placeholder = { Text("搜索应用名或包名…", color = StarWhite.copy(alpha = 0.35f)) },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -206,7 +206,7 @@ private fun UninstallRow(app: UninstallEntry, accent: Color, onClick: () -> Unit
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(20.dp))
+            .glass(shape = beidouShape(20.dp))
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -215,11 +215,11 @@ private fun UninstallRow(app: UninstallEntry, accent: Color, onClick: () -> Unit
             Image(
                 bitmap = app.icon.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)),
+                modifier = Modifier.size(44.dp).clip(beidouShape(14.dp)),
             )
         } else {
             Box(
-                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(accent.copy(alpha = 0.15f)),
+                modifier = Modifier.size(44.dp).clip(beidouShape(14.dp)).background(accent.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
                 StarGlyph(color = accent, size = 22.dp)

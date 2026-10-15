@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,6 +50,7 @@ import org.beidou.stareye.ui.theme.DeepSpace
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天玑中枢 —— 转接层 Activity。
@@ -242,7 +242,7 @@ private fun RelayPanel(intent: Intent, onDone: () -> Unit) {
 
             is RelayTarget.Uninstall -> {
                 Column(
-                    modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(24.dp)).padding(20.dp),
+                    modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(24.dp)).padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text("卸载请求", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
@@ -292,7 +292,7 @@ private fun RelayPanel(intent: Intent, onDone: () -> Unit) {
 @Composable
 private fun HintCard(text: String, color: Color) {
     Box(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(18.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(18.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
@@ -312,7 +312,7 @@ private fun ActionRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(beidouShape(16.dp))
                 .background(primaryColor.copy(alpha = 0.18f))
                 .clickable(enabled = enabled, onClick = onPrimary)
                 .padding(vertical = 14.dp),
@@ -328,7 +328,7 @@ private fun ActionRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(beidouShape(16.dp))
                 .background(Color.White.copy(alpha = 0.08f))
                 .clickable(enabled = !busy, onClick = onCancel)
                 .padding(vertical = 14.dp),

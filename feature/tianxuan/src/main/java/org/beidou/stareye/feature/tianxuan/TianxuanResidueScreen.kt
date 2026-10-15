@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -49,6 +48,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天璇中枢 —— 残留目录扫描页。
@@ -98,7 +98,7 @@ fun TianxuanResidueScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -114,7 +114,7 @@ fun TianxuanResidueScreen(onBack: () -> Unit) {
             }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(accent.copy(alpha = 0.15f))
                     .clickable(enabled = !loading && !busy) { refreshKey++ }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -133,7 +133,7 @@ fun TianxuanResidueScreen(onBack: () -> Unit) {
         // 能力状态提示
         if (!shizukuReady) {
             Box(
-                modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)).padding(14.dp),
+                modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)).padding(14.dp),
             ) {
                 Text(
                     "✦ 残留扫描需要天枢中枢（Shizuku）就绪；当前不可用，请先激活并授权天枢。",
@@ -246,7 +246,7 @@ private fun ResidueRow(
     onDelete: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(14.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -284,7 +284,7 @@ private fun ResidueRow(
         Spacer(Modifier.width(10.dp))
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                 .clickable(enabled = !busy) { onDelete() }
                 .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -311,7 +311,7 @@ private fun CategoryBadge(category: String, accent: Color) {
         style = MaterialTheme.typography.labelSmall,
         color = color,
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(beidouShape(6.dp))
             .background(Color.White.copy(alpha = 0.06f))
             .padding(horizontal = 6.dp, vertical = 1.dp),
     )

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,7 @@ import kotlinx.coroutines.withContext
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天权中枢 —— 局域网文件服务面板（HTTP / FTP）。
@@ -221,7 +221,7 @@ private fun ServiceCard(title: String, titleColor: Color, content: @Composable (
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(beidouShape(14.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .padding(12.dp),
     ) {
@@ -238,7 +238,7 @@ private fun StatusLine(running: Boolean, runningColor: Color = Color(0xFF7CE0C3)
             Modifier
                 .width(8.dp)
                 .height(8.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(beidouShape(50))
                 .background(if (running) runningColor else Color.White.copy(alpha = 0.25f)),
         )
         Spacer(Modifier.width(8.dp))
@@ -254,7 +254,7 @@ private fun StatusLine(running: Boolean, runningColor: Color = Color(0xFF7CE0C3)
 private fun MiniChip(label: String, color: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(color.copy(alpha = 0.16f))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),

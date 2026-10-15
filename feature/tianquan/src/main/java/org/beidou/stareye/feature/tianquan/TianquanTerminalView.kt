@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.beidou.stareye.ui.components.StarGlyph
+import org.beidou.stareye.ui.theme.beidouShape
 
 /** 选择范围（行号以「回滚历史 + 屏幕」合并后的绝对行序为准） */
 data class TerminalSelection(
@@ -130,7 +130,7 @@ fun TianquanTerminalView(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(beidouShape(16.dp))
             .background(background),
     ) {
         if (emulator == null) {

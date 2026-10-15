@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -53,6 +52,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 import kotlinx.coroutines.launch
 
 /**
@@ -91,7 +91,7 @@ fun KaiyangScreen(onBack: () -> Unit) {
     ) {
         // 顶栏
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -132,7 +132,7 @@ fun KaiyangScreen(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(24.dp))
+                .glass(shape = beidouShape(24.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -192,7 +192,7 @@ private fun DeviceOwnerActivationCard(context: Context, onActivated: () -> Unit)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -216,7 +216,7 @@ private fun DeviceOwnerActivationCard(context: Context, onActivated: () -> Unit)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(16.dp))
+                .glass(shape = beidouShape(16.dp))
                 .clickable(enabled = !activating) {
                     activating = true
                     output = ""
@@ -280,7 +280,7 @@ private fun AuthorizedAppsCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -353,7 +353,7 @@ private fun OwnerActionsCard(context: Context, onChanged: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -371,7 +371,7 @@ private fun OwnerActionsCard(context: Context, onChanged: () -> Unit) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(beidouShape(16.dp))
                     .background(StarBlue.copy(alpha = 0.18f))
                     .clickable { showTransfer = true }
                     .padding(vertical = 14.dp),
@@ -382,7 +382,7 @@ private fun OwnerActionsCard(context: Context, onChanged: () -> Unit) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(beidouShape(16.dp))
                     .background(Color(0xFFFF6B9D).copy(alpha = 0.18f))
                     .clickable { showClear = true }
                     .padding(vertical = 14.dp),
@@ -471,7 +471,7 @@ private fun CommandBlock(context: Context, title: String, command: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(beidouShape(14.dp))
                 .background(Color.Black.copy(alpha = 0.35f))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -486,7 +486,7 @@ private fun CommandBlock(context: Context, title: String, command: String) {
             Spacer(Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(beidouShape(50))
                     .background(StarBlue.copy(alpha = 0.18f))
                     .clickable {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

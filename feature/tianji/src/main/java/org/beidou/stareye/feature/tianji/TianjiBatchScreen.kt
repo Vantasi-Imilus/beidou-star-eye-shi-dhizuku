@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -51,6 +50,7 @@ import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天玑中枢 —— 批量安装队列页面。
@@ -94,7 +94,7 @@ fun TianjiBatchScreen(uris: List<Uri>, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.glass(shape = RoundedCornerShape(50))) {
+            IconButton(onClick = onBack, modifier = Modifier.glass(shape = beidouShape(50))) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
             }
             Spacer(Modifier.width(12.dp))
@@ -121,7 +121,7 @@ fun TianjiBatchScreen(uris: List<Uri>, onBack: () -> Unit) {
         if (current == null) {
             // 入队解析中
             Column(
-                modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(18.dp),
+                modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text("正在解析安装包…", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
@@ -159,7 +159,7 @@ private fun BatchPanel(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // 总进度
         Column(
-            modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -228,7 +228,7 @@ private fun BatchPanel(
 @Composable
 private fun SummaryCard(state: TianjiBatchState, accent: Color) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("✦ 批量完成", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
@@ -268,7 +268,7 @@ private fun SummaryCard(state: TianjiBatchState, accent: Color) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(beidouShape(12.dp))
                         .background(Color.White.copy(alpha = 0.05f))
                         .padding(10.dp),
                 ) {
@@ -306,18 +306,18 @@ private fun BatchItemRow(item: TianjiBatchItem, accent: Color) {
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(16.dp)).padding(12.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(16.dp)).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (item.apk?.icon != null) {
             Image(
                 bitmap = item.apk.icon.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.size(40.dp).clip(beidouShape(12.dp)),
             )
         } else {
             Box(
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(accent.copy(alpha = 0.15f)),
+                modifier = Modifier.size(40.dp).clip(beidouShape(12.dp)).background(accent.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
                 StarGlyph(color = accent, size = 20.dp)
@@ -377,7 +377,7 @@ private fun BatchButton(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(beidouShape(16.dp))
             .background(color.copy(alpha = if (enabled) 0.18f else 0.06f))
             .clickable(enabled = enabled, onClick = onClick)
             .padding(vertical = 14.dp),

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 import java.io.File
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -78,7 +78,7 @@ fun ActivationCard() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -140,7 +140,7 @@ fun ActivationCard() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .glass(shape = RoundedCornerShape(16.dp))
+                    .glass(shape = beidouShape(16.dp))
                     .clickable(enabled = !activating) {
                         activating = true
                         wirelessOutput = ""
@@ -277,7 +277,7 @@ private fun CommandBlock(context: Context, title: String, command: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(beidouShape(14.dp))
                 .background(Color.Black.copy(alpha = 0.35f))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -299,7 +299,7 @@ private fun CommandBlock(context: Context, title: String, command: String) {
 private fun CopyChip(context: Context, label: String, text: String) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(beidouShape(50))
             .background(StarBlue.copy(alpha = 0.18f))
             .clickable {
                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

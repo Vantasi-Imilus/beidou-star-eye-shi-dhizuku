@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -58,6 +57,7 @@ import org.beidou.stareye.ui.theme.DeepSpaceLight
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 private val TABS = listOf("首页", "应用", "设置")
 
@@ -116,7 +116,7 @@ fun YaoguangScreen(onBack: () -> Unit) {
             ) {
                 IconButton(
                     onClick = onBack,
-                    modifier = Modifier.glass(shape = RoundedCornerShape(50)),
+                    modifier = Modifier.glass(shape = beidouShape(50)),
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = StarWhite)
                 }
@@ -160,7 +160,7 @@ fun YaoguangScreen(onBack: () -> Unit) {
 
             if (message.isNotEmpty()) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                    modifier = Modifier.fillMaxWidth().clip(beidouShape(12.dp))
                         .background(accent.copy(alpha = 0.12f))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                 ) {
@@ -344,7 +344,7 @@ private fun HomeTab(
                             color = StarWhite,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .padding(horizontal = 8.dp, vertical = 10.dp)
                                 .clickable {
                                     YaoguangStore.setTag(context, selected, tag.id, attached = true)
@@ -374,7 +374,7 @@ private fun AppGridItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(beidouShape(16.dp))
             .background(if (selected) accent.copy(alpha = 0.18f) else Color.Transparent)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = 8.dp, horizontal = 2.dp),
@@ -505,7 +505,7 @@ private fun AppRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(beidouShape(14.dp))
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -667,7 +667,7 @@ private fun AppActionDialog(
                             color = if (attached) accent else StarWhite,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .clickable {
                                     YaoguangStore.setTag(
                                         context, listOf(app.packageName), tag.id, attached = !attached,
@@ -698,7 +698,7 @@ private fun AppActionDialog(
                             color = StarWhite,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(beidouShape(10.dp))
                                 .clickable {
                                     YaoguangOps.scheduleFreeze(context, app.packageName, minutes)
                                     onChanged("已排定：${app.label} · $minutes 分钟后冻结")
@@ -724,7 +724,7 @@ private fun ActionText(text: String, onClick: () -> Unit) {
         color = StarWhite,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(beidouShape(10.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 10.dp),
     )

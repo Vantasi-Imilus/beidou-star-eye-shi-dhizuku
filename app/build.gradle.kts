@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":feature:yuheng"))
     implementation(project(":feature:kaiyang"))
     implementation(project(":feature:yaoguang"))
+    implementation(project(":feature:fanxiang"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)

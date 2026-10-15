@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -39,6 +38,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 天玑中枢 —— 设置标签页：安装配置（授权器 / 安装原因 / 请求方 / 各开关）与禁止安装名单。
@@ -70,7 +70,7 @@ fun TianjiSettingsTab(accent: Color) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(beidouShape(12.dp))
                         .background(if (options.authorizer == a) accent.copy(alpha = 0.16f) else Color.Transparent)
                         .clickable { update(options.copy(authorizer = a)) }
                         .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -122,7 +122,7 @@ fun TianjiSettingsTab(accent: Color) {
             TextField(
                 value = options.installerPackage,
                 onValueChange = { update(options.copy(installerPackage = it)) },
-                modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(14.dp)),
+                modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(14.dp)),
                 placeholder = { Text("如：com.android.vending", color = StarWhite.copy(alpha = 0.3f)) },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
@@ -187,7 +187,7 @@ fun TianjiSettingsTab(accent: Color) {
                 TextField(
                     value = newBlocked,
                     onValueChange = { newBlocked = it },
-                    modifier = Modifier.weight(1f).glass(shape = RoundedCornerShape(14.dp)),
+                    modifier = Modifier.weight(1f).glass(shape = beidouShape(14.dp)),
                     placeholder = { Text("输入要禁止的包名", color = StarWhite.copy(alpha = 0.3f)) },
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
@@ -208,7 +208,7 @@ fun TianjiSettingsTab(accent: Color) {
                     fontWeight = FontWeight.Bold,
                     color = accent,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
+                        .clip(beidouShape(50))
                         .background(accent.copy(alpha = 0.18f))
                         .clickable {
                             TianjiPrefs.addBlacklist(context, newBlocked)
@@ -243,7 +243,7 @@ fun TianjiSettingsTab(accent: Color) {
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFFF6B9D),
                             modifier = Modifier
-                                .clip(RoundedCornerShape(50))
+                                .clip(beidouShape(50))
                                 .background(Color(0xFFFF6B9D).copy(alpha = 0.14f))
                                 .clickable {
                                     TianjiPrefs.removeBlacklist(context, pkg)
@@ -263,7 +263,7 @@ fun TianjiSettingsTab(accent: Color) {
 @Composable
 private fun SectionCard(title: String, accent: Color, content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().glass(shape = RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().glass(shape = beidouShape(20.dp)).padding(16.dp),
     ) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = accent)
         Spacer(Modifier.height(10.dp))
@@ -288,7 +288,7 @@ private fun <T> OptionChips(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(beidouShape(12.dp))
                             .background(if (on) accent.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.06f))
                             .clickable { onSelect(v) }
                             .padding(vertical = 10.dp),

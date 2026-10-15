@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -33,6 +32,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarBlue
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 已授权应用列表：每个应用一个开关，控制是否授予其天枢（Shizuku）权限。
@@ -47,7 +47,7 @@ fun AuthorizedAppsCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -144,7 +144,8 @@ fun authLevelText(level: AuthLevel): String = when (level) {
     AuthLevel.NONE -> "未授权"
 }
 
-/** 授权等级颜色（root 用动态彩虹，见 [RainbowText]） */
+/** 授权等级颜色（root 用动态彩虹，见 [RainbowText]）；色值随主题（含反向星界）变化 */
+@Composable
 fun authLevelColor(level: AuthLevel): Color = when (level) {
     AuthLevel.ROOT -> Color(0xFFFF6B9D)
     AuthLevel.ADB -> StarBlue

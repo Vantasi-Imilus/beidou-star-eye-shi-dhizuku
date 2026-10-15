@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -42,6 +41,7 @@ import org.beidou.stareye.ui.components.glass
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 import rikka.shizuku.Shizuku
 
 /**
@@ -108,7 +108,7 @@ fun TianshuScreen(onBack: () -> Unit) {
         ) {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier.glass(shape = RoundedCornerShape(50)),
+                modifier = Modifier.glass(shape = beidouShape(50)),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -155,7 +155,7 @@ fun TianshuScreen(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(24.dp))
+                .glass(shape = beidouShape(24.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -244,7 +244,7 @@ private fun RequestPermissionCard(accent: Color, onRequest: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(24.dp))
+            .glass(shape = beidouShape(24.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -262,7 +262,7 @@ private fun RequestPermissionCard(accent: Color, onRequest: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glass(shape = RoundedCornerShape(16.dp))
+                .glass(shape = beidouShape(16.dp))
                 .clickable(onClick = onRequest)
                 .padding(vertical = 14.dp),
             contentAlignment = Alignment.Center,
@@ -282,7 +282,7 @@ private fun StopServerButton(onStop: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .glass(shape = RoundedCornerShape(20.dp))
+            .glass(shape = beidouShape(20.dp))
             .clickable(onClick = onStop)
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center,

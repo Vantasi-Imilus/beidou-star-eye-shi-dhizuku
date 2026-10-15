@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import org.beidou.stareye.ui.theme.BeidouTheme
 import org.beidou.stareye.ui.theme.StarGold
 import org.beidou.stareye.ui.theme.StarWhite
 import org.beidou.stareye.ui.theme.starAccent
+import org.beidou.stareye.ui.theme.beidouShape
 
 /**
  * 开阳中枢授权确认页。
@@ -144,7 +144,7 @@ private fun KaiyangPermissionDialog(
     Column(
         modifier = Modifier
             .fillMaxWidth(0.86f)
-            .glass(shape = RoundedCornerShape(28.dp))
+            .glass(shape = beidouShape(28.dp))
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -183,7 +183,7 @@ private fun KaiyangPermissionDialog(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(beidouShape(16.dp))
                     .background(Color.White.copy(alpha = 0.08f))
                     .clickable(onClick = onDeny)
                     .padding(vertical = 14.dp),
@@ -194,7 +194,7 @@ private fun KaiyangPermissionDialog(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(beidouShape(16.dp))
                     .background(accent.copy(alpha = 0.22f))
                     .clickable(onClick = onAllow)
                     .padding(vertical = 14.dp),

@@ -47,3 +47,6 @@ include(":feature:tianquan")   // Termux-X   · 天权中枢
 include(":feature:yuheng")     // OwnDroid   · 玉衡中枢
 include(":feature:kaiyang")    // Dhizuku    · 开阳中枢
 include(":feature:yaoguang")   // 雹 Hail    · 瑶光中枢
+
+// 反向星界（隐藏入口：编辑大标题为「逆北斗·群星之眼」进入；非第八中枢卡片）
+include(":feature:fanxiang")
