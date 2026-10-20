@@ -10,23 +10,33 @@ echo "=========================================="
 echo "  北斗·群星之眼 一键编译"
 echo "=========================================="
 
-# 1. 定位 JDK（优先 JDK 21）
+# 1. 定位 JDK：JAVA_HOME 优先；否则探测常见安装位置（不含任何本机路径）；最后回退 PATH
 if [ -z "${JAVA_HOME:-}" ] || [ ! -x "$JAVA_HOME/bin/java" ]; then
   for j in \
-    "/c/Users/Bob/Doubao/chats/2026-09-10/new-chat/jdk-21.0.2" \
     "/c/Program Files/Android/Android Studio/jbr" \
     "/c/Program Files/Java/jdk-21" \
-    "/c/Program Files/Eclipse Adoptium/jdk-21.0.2-hotspot"; do
+    "/c/Program Files/Eclipse Adoptium/jdk-21.0.2-hotspot" \
+    "$HOME/.jdks/temurin-21" \
+    "$HOME/.sdkman/candidates/java/current" \
+    "/usr/lib/jvm/java-21-openjdk-amd64" \
+    "/usr/lib/jvm/java-21-openjdk" \
+    "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home"; do
     if [ -x "$j/bin/java" ]; then
       export JAVA_HOME="$j"
       break
     fi
   done
 fi
+
 if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then
   echo "[信息] 使用 JDK: $JAVA_HOME"
+elif command -v java >/dev/null 2>&1; then
+  echo "[提示] 未找到独立 JDK，使用 PATH 中的 java（要求 JDK 17+，推荐 21）"
+  java -version 2>&1 | head -n 1
 else
-  echo "[警告] 未找到独立 JDK，使用 PATH 中的 java（建议 JDK 21+）"
+  echo "[错误] 未找到 JDK：请安装 JDK 21，或设置 JAVA_HOME 指向 JDK 安装目录。" >&2
+  echo "       示例：export JAVA_HOME=/path/to/jdk-21" >&2
+  exit 1
 fi
 
 # 2. 编译（debug 用于真机调试；release 复用 debug 签名、不开 R8，行为与 debug 等价）

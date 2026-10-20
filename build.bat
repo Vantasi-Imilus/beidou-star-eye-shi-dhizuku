@@ -8,17 +8,25 @@ echo ==========================================
 echo   Beidou Star Eye - One-Click Build
 echo ==========================================
 
-rem ---- Locate JDK (prefer JDK 21) ----
+rem ---- Locate JDK: JAVA_HOME first, then common install locations, finally PATH ----
 set "JDK="
-if exist "C:\Users\Bob\Doubao\chats\2026-09-10\new-chat\jdk-21.0.2\bin\java.exe" set "JDK=C:\Users\Bob\Doubao\chats\2026-09-10\new-chat\jdk-21.0.2"
+if defined JAVA_HOME if exist "%JAVA_HOME%\bin\java.exe" set "JDK=%JAVA_HOME%"
 if not defined JDK if exist "%ProgramFiles%\Android\Android Studio\jbr\bin\java.exe" set "JDK=%ProgramFiles%\Android\Android Studio\jbr"
 if not defined JDK if exist "%ProgramFiles%\Java\jdk-21\bin\java.exe" set "JDK=%ProgramFiles%\Java\jdk-21"
+if not defined JDK if exist "%ProgramFiles%\Eclipse Adoptium\jdk-21.0.2-hotspot\bin\java.exe" set "JDK=%ProgramFiles%\Eclipse Adoptium\jdk-21.0.2-hotspot"
+if not defined JDK if exist "%LOCALAPPDATA%\Programs\Eclipse Adoptium\jdk-21.0.2-hotspot\bin\java.exe" set "JDK=%LOCALAPPDATA%\Programs\Eclipse Adoptium\jdk-21.0.2-hotspot"
 
 if defined JDK (
     set "JAVA_HOME=!JDK!"
     echo [INFO] Using JDK: !JAVA_HOME!
 ) else (
-    echo [WARN] No standalone JDK found, using system java (JDK 21+ recommended)
+    where java >nul 2>nul
+    if errorlevel 1 (
+        echo [ERROR] No JDK found. Install JDK 21 or set JAVA_HOME.
+        pause
+        exit /b 1
+    )
+    echo [INFO] No standalone JDK found, using java from PATH ^(JDK 17+ required, 21 recommended^)
 )
 
 rem ---- Build (debug for device testing; release reuses debug signing, no R8) ----
