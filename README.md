@@ -2,8 +2,6 @@
 
 # 北斗 · 群星之眼
 
-**把七个开源 Android 神器的工作流，装进一个星空液态玻璃风格的应用里**
-
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-green)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.4-purple)
